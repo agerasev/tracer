@@ -2,11 +2,13 @@
 #include<cmath>
 #include<ctime>
 
-Random::Initializer() {
+#include"random.h"
+
+Random::Initializer::Initializer() {
 	srand(time(nullptr));
 }
 
-static double Random::get(double a = 1.0) {
+double Random::get(double a) {
 	return a*static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 }
 

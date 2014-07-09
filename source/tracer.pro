@@ -3,8 +3,16 @@ CONFIG += console
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS -= -Wunused-parameter
 
-LIBS += -lSDL2main -lSDL2 -lGLEW -lGL
+unix {
+    LIBS += -lSDL2main -lSDL2 -lGLEW -lGL
+}
+
+win32 {
+    INCLUDEPATH += C:\GLEW-MinGW\include C:\SDL2-2.0.3\i686-w64-mingw32\include
+    LIBS += -lmingw32 -LC:\SDL2-2.0.3\i686-w64-mingw32\lib -lsdl2main -lsdl2 -LC:\GLEW-MinGW\lib -lglew32 -lopengl32
+}
 
 HEADERS += \
     window/window.h \
@@ -24,7 +32,6 @@ HEADERS += \
     tracer/object.h \
     tracer/scene.h \
     tracer/ray.h \
-    tracer/beam.h \
     tracer/spectator.h \
     tracer/object/object.h \
     tracer/object/sphere.h \
@@ -36,12 +43,12 @@ HEADERS += \
     util/linalg/vec3.hpp \
     util/linalg/vec4.hpp \
     util/linalg/vecn.hpp \
-    tracer/beam/beam.h \
     tracer/beam/beamset.h \
     tracer/beam/beamdistrib.h \
     tracer/beam/beamreflected.h \
     util/random.h \
-    util/linalg.hpp
+    util/linalg.hpp \
+    tracer/distrib/reflection.h
 
 SOURCES += \
     window/window.cpp \
@@ -49,7 +56,6 @@ SOURCES += \
     main.cpp \
     renderer/tiling.cpp \
     renderer/renderer.cpp \
-    util/distrib/contdistrib.cpp \
     util/random.cpp
 
 OTHER_FILES += \

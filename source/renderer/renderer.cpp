@@ -92,7 +92,7 @@ void Renderer::draw() {
     for(int iy = t.y; iy < t.y + t.h; iy+=step) {
         for(int ix = t.x; ix < t.x + t.w; ix+=step) {
 
-			Color col(0,0,0,1);
+			Color col(0,0,0);
 
             for(int jx = 0; jx < fsize; ++jx) {
                 for(int jy = 0; jy < fsize; ++jy) {

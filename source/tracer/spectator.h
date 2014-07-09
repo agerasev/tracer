@@ -6,7 +6,6 @@
 
 #include"object.h"
 #include"ray.h"
-#include"beam.h"
 
 #include<cmath>
 

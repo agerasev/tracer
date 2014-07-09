@@ -2,16 +2,16 @@
 #define SCENE_H
 
 #include<list>
-using namespace std;
+#include<vector>
 
 #include"object.h"
 #include"ray.h"
-#include"beam.h"
 
 class Scene
 {
 private:
-	list<Object*> container;
+	std::list<Object*> container;
+	Color diffuse = Color(1,1,1);
 public:
 	void add(Object *obj) {
 		container.push_back(obj);
@@ -25,22 +25,23 @@ public:
 	list<Object*>::iterator end() {
 		return container.end();
 	}
-	bool trace(const Ray &ray, Beam &beam) {
-		bool hit = false;
+	Color trace(const Ray &ray, std::vector<Ray> &buffer, int quality) {
 		double record = 0.0;
+		Object *target = nullptr;
 		for(Object *obj : container) {
 			vec3 pnt;
-			Beam lbm;
-			if(obj->trace(ray,pnt,lbm)) {
+			if(obj->collide(ray,pnt)) {
 				double dist = (pnt - ray.start)*ray.direction;
-				if(dist < record || !hit) {
+				if(dist < record || target == nullptr) {
 					record = dist;
-					beam = lbm;
-					hit = true;
+					target = obj;
 				}
 			}
 		}
-		return hit;
+		if(target != nullptr) {
+			return target->trace(ray,buffer,quality);
+		}
+		return diffuse*ray.color;
 	}
 };
 

@@ -1,6 +1,8 @@
 #ifndef TRACER_H
 #define TRACER_H
 
+#include<vector>
+
 #include"../renderer/renderer.h"
 #include"../util/color.hpp"
 
@@ -14,16 +16,33 @@ private:
 	Scene scene;
 	Spectator spect;
 public:
-	Tracer() {
-		scene.add(new Sphere(vec3(0,0,-8)));
-		scene.add(new Sphere(vec3(1,1,-6),0.5));
+	Tracer() :
+		spect(vec3(0,0,0),mat3(1),0.2){
+		scene.add(new Sphere(vec3(-1,0,-8),1.0,Color(0.9,0,0)));
+		scene.add(new Sphere(vec3(0.5,0,-8),0.5,Color(0,0,0.9)));
 	}
 	virtual Color trace(double x, double y) {
-		Beam beam;
-		if(scene.trace(spect.trace(x,y),beam)) {
-            return Color(1,1,1,1);
+		Color sum(0,0,0);
+
+		std::vector<Ray> buffer0;
+		std::vector<Ray> buffer1;
+
+		std::vector<Ray> *src = &buffer0;
+		std::vector<Ray> *dst = &buffer1;
+
+		src->push_back(spect.trace(x,y));
+		for(int i = 0; i < 0x10; ++i) {
+			for(const Ray &r : *src) {
+				sum = sum + scene.trace(r,*dst,4);
+				src->clear();
+				//swapping
+				std::vector<Ray> *tmp = src;
+				src = dst;
+				dst = tmp;
+			}
 		}
-		return Color(0,0,0,1);
+
+		return sum;
 	}
 };
 

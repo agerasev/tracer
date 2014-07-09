@@ -1,12 +1,13 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include<vector>
+
 #include"../util/vec.hpp"
 #include"../util/mat.hpp"
 
 #include"object.h"
 #include"ray.h"
-#include"beam.h"
 
 class Object
 {
@@ -18,7 +19,8 @@ public:
 		position(pos), orientation(ori) {}
 
 	virtual double size() const = 0;
-	virtual bool trace(const Ray &ray, vec3 &pnt, Beam &beam) const = 0;
+	virtual bool collide(const Ray &ray, vec3 &pnt) const = 0;
+	virtual Color trace(const Ray &ray, std::vector<Ray> &buffer, int quality) const = 0;
 };
 
 #endif // OBJECT_H

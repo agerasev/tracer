@@ -21,7 +21,7 @@ private:
 
     int w, h;
 
-    int tileSize = 0x20;
+	int tileSize = 0x10;
     int currentTile = 0;
 
     void buildTiling();

@@ -7,9 +7,9 @@ class Material {
 public:
 	Color ambient;
 	Color diffuse;
-	Color specular;
 	Color emision;
 	double shininess;
+	double specular;
 };
 
 #endif // MATERIAL_H

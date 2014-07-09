@@ -1,3 +1,2 @@
-done! 1. Specialize, not inherit vecn and matnxm
-2. Add distribution to beams
+2. Remove beams - add rays to queue
 3. Add iterative raytracing
