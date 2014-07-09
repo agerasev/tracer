@@ -1,0 +1,1 @@
+#include"linalg/vec.hpp"
