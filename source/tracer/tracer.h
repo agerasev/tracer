@@ -17,9 +17,16 @@ private:
 	Spectator spect;
 public:
 	Tracer() :
-		spect(vec3(0,0,0),mat3(1),0.2){
-		scene.add(new Sphere(vec3(-1,0,-8),1.0,Color(0.9,0,0)));
-		scene.add(new Sphere(vec3(0.5,0,-8),0.5,Color(0,0,0.9)));
+		spect(vec3(0,0,0),mat3(1),0.4)
+	{
+		Material
+				m0(Color(0.9,0.2,0.2),0.8),
+				m1(Color(0.2,0.2,0.9),0.8),
+				m2(Color(0.2,1,0.2),1.0,Color(20,20,20));
+
+		scene.add(new Sphere(vec3(-1,0,-8),1.0,m0));
+		scene.add(new Sphere(vec3(0.5,0,-8),0.5,m1));
+		//scene.add(new Sphere(vec3(0,2,-7),0.2,m2));
 	}
 	virtual Color trace(double x, double y) {
 		Color sum(0,0,0);
@@ -31,7 +38,7 @@ public:
 		std::vector<Ray> *dst = &buffer1;
 
 		src->push_back(spect.trace(x,y));
-		for(int i = 0; i < 0x10; ++i) {
+		for(int i = 0; i < 0x2; ++i) {
 			for(const Ray &r : *src) {
 				sum = sum + scene.trace(r,*dst,4);
 				src->clear();

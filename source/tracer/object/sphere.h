@@ -19,16 +19,11 @@ private:
 
 public:
 
-	Sphere(const vec3 &pos, double rad, const Color &c) : Object(pos)
+	Sphere(const vec3 &pos, double rad, const Material &m) : Object(pos), material(m)
 	{
 		radius = rad;
 		point = new vec3();
 		entry = new double();
-		material.ambient = c;
-		material.diffuse = Color(0.9,0,0);
-		material.shininess = 0.0;
-		material.emision = Color(0,0,0);
-		material.specular = 0.2;
 	}
 	virtual ~Sphere() {
 		delete point;
@@ -61,17 +56,16 @@ public:
 		vec3 normal = (*point - position)/radius;
 		vec3 refldir = ray.direction - (2.0*normal*ray.direction)*normal;
 
-		//diffuse
-		if(material.shininess > 0.001) {
-			buffer.push_back(Ray(*point, refldir, ray.color*material.diffuse*material.shininess));
-		}
-		//ambient
-		if(material.shininess < 0.999) {
-			Reflection reflection(normal,refldir,material.specular);
-			for(int i = 0; i < 1<<quality; ++i) {
-				vec3 v = reflection.get();
-				buffer.push_back(Ray(*point,v,ray.color*material.ambient*(1.0 - material.shininess)/(1<<quality)));
-			}
+		Reflection reflection(normal,refldir,material.specular);
+
+		for(int i = 0; i < 1<<quality; ++i) {
+			//ambient
+			vec3 v = reflection.cont();
+			buffer.push_back(Ray(*point, v, ray.color*material.ambient/(1<<quality)));
+
+			//diffuse
+			//v = reflection.direct(v);
+			//buffer.push_back(Ray(*point, v, ray.color*material.diffuse/(1<<quality)));
 		}
 
 		return ray.color*material.emision;

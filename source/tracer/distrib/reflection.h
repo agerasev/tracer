@@ -34,16 +34,20 @@ public:
         ny = norm(nx^normal);
         nx = ny^normal;
 	}
-	vec3 get() const
+	vec3 cont() const
     {
         // getting continuous distribution
 		double phi = Random::get(2*PI);
 		double theta = acos(1.0 - Random::get());
         vec3 v = (nx*cos(phi) + ny*sin(phi))*sin(theta) + normal*cos(theta);
 
-        //setting divergence
-        vec3 vr = (v*normal)/(reflection*normal)*reflection;
-        vec3 vp = v - vr;
+		return v;
+	}
+	vec3 direct(vec3 v) const
+	{
+		//setting divergence
+		vec3 vr = (v*normal)/(reflection*normal)*reflection;
+		vec3 vp = v - vr;
 		vp = vp * (1.0 - spec);
 		v = norm(vp + vr);
 
