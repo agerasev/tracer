@@ -1,2 +1,0 @@
-2. Remove beams - add rays to queue
-3. Add iterative raytracing

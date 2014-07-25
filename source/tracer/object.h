@@ -3,24 +3,53 @@
 
 #include<vector>
 
-#include"../util/vec.hpp"
-#include"../util/mat.hpp"
+#include<4u/la/vec.hpp>
+#include<4u/la/mat.hpp>
+#include"ray.h"
 
 #include"object.h"
 #include"ray.h"
+#include"traceparams.h"
 
 class Object
 {
-public:
+private:
 	vec3 position;
-	mat3 orientation;
 
-	Object(const vec3 &pos = vec3(0,0,0), const mat3 &ori = mat3(1)) :
-		position(pos), orientation(ori) {}
+public:
+	/* Class for storing data computed at inersection
+	 * stage and what is necessary for tracing stage */
+	class IntersectState
+	{
+	public:
 
-	virtual double size() const = 0;
-	virtual bool collide(const Ray &ray, vec3 &pnt) const = 0;
-	virtual Color trace(const Ray &ray, std::vector<Ray> &buffer, int quality) const = 0;
+	};
+
+	Object(vec3 pos)
+		: position(pos)
+	{
+
+	}
+
+	vec3 getPosition() const
+	{
+		return position;
+	}
+
+	/* Bounding radius of object is used
+	 * to searching for intersections faster */
+	virtual double getSize() const = 0;
+
+	/* Method used to find closest intersection point
+	 * without secondary raycasting */
+	virtual bool intersect(const Ray &ray, vec3 &point, const TraceParams::SceneParam &param, IntersectState *&state) const = 0;
+
+	/* Makes object forget about dumped state */
+	virtual void forget(IntersectState *&state) const = 0;
+
+	/* Causes next reytracing iterations after intersection point was founded.
+	 * Produces secondary rays and returns emitting light */
+	virtual std::vector<Ray> trace(const Ray &ray, vec4 &ret, const TraceParams::SceneParam &param, IntersectState *&state) const = 0;
 };
 
 #endif // OBJECT_H
