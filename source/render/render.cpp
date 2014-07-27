@@ -1,6 +1,7 @@
 #include"render.h"
 
 #include<SDL2/SDL.h>
+#include<iostream>
 
 void Render::init() throw(Exception) {
     w = 0; h = 0;
@@ -62,11 +63,11 @@ void Render::handle(const Event &event) {
 		if(event.key.keysym.sym == SDLK_s)
 		{
 			SDL_Surface *bitmap = SDL_CreateRGBSurface(SDL_SWSURFACE,w,h,32,0x000000ff,0x0000ff00,0x00ff0000,0xff000000);
-			for(int iy = 0; iy < 0; ++iy)
+			for(int iy = 0; iy < h; ++iy)
 			{
-				for(int ix = 0; ix < 0; ++ix)
+				for(int ix = 0; ix < w; ++ix)
 				{
-					float *data = color + 4*(iy*w + ix);
+					float *data = color + 4*((h - iy - 1)*w + ix);
 					*(static_cast<unsigned int*>(bitmap->pixels) + (iy*w + ix)) =
 							(static_cast<unsigned int>((*(data+0))*0xff)<<0) +
 							(static_cast<unsigned int>((*(data+1))*0xff)<<8) +
@@ -75,6 +76,7 @@ void Render::handle(const Event &event) {
 				}
 			}
 			SDL_SaveBMP(bitmap,"../output/render.bmp");
+			std::cout << "'render.bmp' was saved to 'output'" << std::endl;
 		}
 		break;
 	default:

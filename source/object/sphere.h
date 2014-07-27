@@ -4,24 +4,20 @@
 #include<cmath>
 #include<vector>
 
-#include<tracer/object.h>
+#include<object/object.h>
+
+#include<material/specularmaterial.h>
 
 class Sphere : public Object
 {
 private:
 	double radius;
-
+	const Material *material = nullptr;
 public:
-	class SphereIntersectState : public IntersectState
-	{
-	public:
-		vec3 point;
-		double entry;
-	};
-
-	Sphere(const vec3 &pos, double rad) : Object(pos)
+	Sphere(const vec3 &pos, double rad, const Material *mat) : Object(pos)
 	{
 		radius = rad;
+		material = mat;
 	}
 	virtual ~Sphere() {
 
@@ -32,7 +28,7 @@ public:
 		return radius;
 	}
 
-	virtual bool intersect(const Ray &ray, vec3 &point, const TraceParams::SceneParam &param, IntersectState *&state) const
+	virtual bool intersect(const Ray &ray, IntersectState &state, const TraceParams::SceneParam &param) const
 	{
 		double closest = (getPosition() - ray.start)*ray.direction;
 		if(closest < 0.0) {
@@ -47,46 +43,15 @@ public:
 			return false;
 		}
 
-		SphereIntersectState *local_state = new SphereIntersectState();
-
-		local_state->entry = entry;
-		point = local_state->point = ray.start + ray.direction*entry;
-		state = local_state;
+		state.point = ray.start + ray.direction*entry;
+		state.normal = (state.point - getPosition())/radius;
 
 		return true;
 	}
 
-	virtual std::vector<Ray> trace(const Ray &ray, vec4 &ret, const TraceParams::SceneParam &param, IntersectState *&state) const
+	virtual vec4 trace(const Ray &ray, std::vector<Ray> &out, const IntersectState &state, const TraceParams::SceneParam &param) const
 	{
-		SphereIntersectState *restored_state = static_cast<SphereIntersectState*>(state);
-
-		vec3 normal = (restored_state->point - getPosition())/radius;
-		vec3 refldir = ray.direction - (2.0*normal*ray.direction)*normal;
-
-		/* Move distribution computation to materials */
-		/*
-		for(int i = 0; i < 1<<param.rays_density; ++i) {
-			vec3 v = reflection.cont();
-
-			// ambient
-			// buffer.push_back(Ray(*point, v, ray.color*material.ambient/(1<<quality)));
-
-			// diffuse
-			// v = reflection.direct(v);
-			// buffer.push_back(Ray(*point, v, ray.color/(1<<param.rays_density)));
-		}
-		*/
-
-		std::vector<Ray> beam;
-		beam.push_back(Ray(restored_state->point,refldir));
-
-		ret = nullvec4;
-	}
-
-	virtual void forget(IntersectState *&state) const
-	{
-		delete state;
-		state = nullptr;
+		return material->trace(ray,out,state,param);
 	}
 };
 

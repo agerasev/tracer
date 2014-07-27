@@ -4,6 +4,8 @@
 class TraceParams
 {
 public:
+	int recursion_depth;
+
 	class SpectatorParam
 	{
 	public:
@@ -13,7 +15,6 @@ public:
 	{
 	public:
 		int rays_density;
-		int recursion_depth;
 	};
 
 	SpectatorParam spectator;

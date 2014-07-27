@@ -3,7 +3,7 @@
 
 #include<list>
 
-#include"object.h"
+#include<object/object.h>
 #include"ray.h"
 #include"traceparams.h"
 
@@ -32,78 +32,52 @@ public:
 	}
 
 public:
-	/* Recursive raytraces scene */
-	vec4 trace(const std::vector<Ray> &beam, const TraceParams::SceneParam &param, int recurse = 0)
+	vec4 trace(const std::vector<Ray> &in, std::vector<Ray> &out, const TraceParams::SceneParam &param)
 	{
-		if(recurse >= param.recursion_depth)
-		{
-			return nullvec4;
-		}
 		vec4 color = nullvec4;
-		for(const Ray &r : beam)
+		for(const Ray &r : in)
 		{
-			color += traceRay(r,param,recurse);
+			color += traceRay(r,out,param);
 		}
 		return color;
 	}
 
 private:
-	vec4 traceRay(const Ray &ray, const TraceParams::SceneParam &param, int recurse)
+	vec4 traceRay(const Ray &ray, std::vector<Ray> &out, const TraceParams::SceneParam &param)
 	{
 		double record = 0.0;
 		Object *target = nullptr;
-		Object::IntersectState *target_state = nullptr;
+		Object::IntersectState target_state;
 
 		for(Object *obj : container)
 		{
+			Object::IntersectState state;
 
-			Object::IntersectState *state = nullptr;
-			vec3 point;
-
-			if(obj->intersect(ray,point,param,state))
+			if(obj->intersect(ray,state,param))
 			{
 
-				double dist = (point - ray.start)*ray.direction;
+				double dist = (state.point - ray.start)*ray.direction;
 
 				if(dist < record || target == nullptr)
 				{
 					record = dist;
-					if(target != nullptr)
-					{
-						target->forget(target_state);
-					}
 					target = obj;
 					target_state = state;
-				}
-				else
-				{
-					obj->forget(state);
 				}
 			}
 		}
 
-		vec4 color;
 		if(target != nullptr)
 		{
-			//std::vector<Ray> beam = target->trace(ray,color,param,target_state);
-
-			target->forget(target_state);
-
-			/* Recursively call tracing */
-			trace(target->trace(ray,color,param,target_state), param, recurse + 1);
-
-		}
-		else
-		{
-			color = diffuse(ray.direction);
+			return target->trace(ray,out,target_state,param);
 		}
 
-		return color & ray.color;
+		return diffuse(ray.direction) & ray.color;
 	}
 
 	vec4 diffuse(const vec3 &dir) const
 	{
-		double col = dir.y()*dir.y();
+		double col = 0.5 + 0.5*dir.y();
 		return vec4(col,col,0.8*col + 0.2,1.0);
 	}
 };

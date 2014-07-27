@@ -4,7 +4,7 @@
 #include<4u/la/vec.hpp>
 #include<4u/la/mat.hpp>
 
-#include"object.h"
+#include<object/object.h>
 #include"ray.h"
 
 #include<cmath>
@@ -22,7 +22,7 @@ public:
 		position(pos), orientation(ori), fov(afov) {}
 
 	/* Produces beam emitting from lens to scene */
-	std::vector<Ray> beam(const vec2 &pix, const TraceParams::SpectatorParam &params) {
+	std::vector<Ray> trace(const vec2 &pix, std::vector<Ray> &out, const TraceParams::SpectatorParam &params) {
 
 		/* plain lens, plain matrix */
 		vec3 dir = orientation*vec3(0,0,-1) + orientation*(fov*vec3(pix.x(),pix.y(),0));
@@ -37,10 +37,9 @@ public:
 
 		/* Now there is only one ray, but it needs to be
 		 * many rays for depth effect */
-		std::vector<Ray> beam;
-		beam.push_back(Ray(position,dir));
+		out.push_back(Ray(position,dir));
 
-		return beam;
+		return out;
 	}
 };
 

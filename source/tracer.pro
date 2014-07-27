@@ -50,13 +50,15 @@ HEADERS += \
     4u/window/sdlwindow.hpp \
     4u/window/window.hpp \
     4u/window/glxwindow.hpp \
-    tracer/object.h \
     tracer/spectator.h \
     tracer/tracer.h \
     tracer/scene.h \
     tracer/ray.h \
     tracer/traceparams.h \
-    object/sphere.h
+    object/sphere.h \
+    material/material.h \
+    object/object.h \
+    material/specularmaterial.h
 
 SOURCES += \
     main.cpp \
