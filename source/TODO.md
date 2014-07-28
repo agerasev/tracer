@@ -1,10 +1,12 @@
-# Neccessary!
-- remove std::vector<Ray> as argument. Maube use common std::queue<Ray>? There must be one common storage.
-- Do not use state as I do now.
+# Features
+- Multithreading
+- OpenMP
+- Distributed computing
 
 # Refactoring
 - Replace vec4 using as a color with special Light class
-- Add Material class
+- Cast rays to light emitters more frequently
+  use normalization by solid angle? computed by emitters
 
 # Ideas for rendering
 - Menger sponge

@@ -8,6 +8,8 @@
 #include<4u/util/const.hpp>
 #include<4u/la/vec.hpp>
 
+#include<4u/util/const.hpp>
+
 class SphericRand : public Rand<vec3>
 {
 private:
@@ -15,7 +17,7 @@ private:
 public:
 	virtual vec3 get()
 	{
-		double phi = generator.get(2.0*PI);
+		double phi = 2.0*PI*generator.get();
 		double theta = acos(1.0 - 2.0*generator.get());
 		return vec3(cos(phi)*sin(theta),sin(phi)*sin(theta),cos(theta));
 	}
@@ -27,20 +29,27 @@ private:
 	SphericRand generator;
 	vec3 normal;
 public:
+	SemiSphericRand()
+	{
+
+	}
+
 	SemiSphericRand(const vec3 &n)
 		: normal(n)
 	{
 
 	}
+
 	void setNormal(const vec3 &n)
 	{
 		normal = n;
 	}
+
 	virtual vec3 get()
 	{
 		vec3 rand = generator.get();
 		double proj = rand*normal;
-		return rand - (proj < 0)*(2.0*normal*proj);
+		return rand - static_cast<double>(proj < 0)*(2.0*normal*proj);
 	}
 };
 

@@ -3,6 +3,8 @@
 
 #include<GL/glew.h>
 
+#include<vector>
+
 #include<4u/window/glwindow.hpp>
 #include<4u/window/event.hpp>
 #include<4u/la/vec.hpp>
@@ -13,7 +15,7 @@ class Render : public GLWindow::Render, public GLWindow::Listener {
 public:
 	class Tracer {
 	public:
-		virtual vec4 trace(const vec2 &pix) = 0;
+		virtual vec4 trace(const vec2 &pix) const = 0;
 	};
 
 private:
@@ -27,7 +29,7 @@ private:
     Uint32 time = 0x10;
 
     const int dmin = -4;
-	const int dmax = 4;
+	const int dmax = 6;
     int det = dmin;
 
 public:
@@ -42,7 +44,11 @@ public:
 
 private:
 	void paint(vec4 c, int ix, int iy, int iw = 1, int ih = 1);
-    void draw();
+
+public:
+	bool getWork(Tiling::Tile &til, int &d);
+	std::vector<vec4> trace(const Tiling::Tile &t, int d, int &step) const;
+	void passWork(const std::vector<vec4> &seg, const Tiling::Tile &t, int step);
 };
 
 #endif // RENDER_H

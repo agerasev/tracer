@@ -2,6 +2,7 @@
 
 #include<SDL2/SDL.h>
 #include<iostream>
+#include<vector>
 
 void Render::init() throw(Exception) {
     w = 0; h = 0;
@@ -39,16 +40,30 @@ void Render::dispose() {
     delete[] vertex;
 }
 
-void Render::display() {
+void Render::display()
+{
+	Uint32 lasttime = SDL_GetTicks();
+	while((SDL_GetTicks() - lasttime) < time) {
+		// mutex.lock();
+		Tiling::Tile til;
+		int d;
+		bool w = getWork(til,d);
+		// mutex.unlock();
 
-    Uint32 lasttime = SDL_GetTicks();
-    while((SDL_GetTicks() - lasttime) < time && !tiling.end()) {
-        draw();
-    }
-    if(tiling.end() && det < dmax) {
-        tiling.rewind();
-        ++det;
-    }
+		int s;
+		if(!w)
+		{
+			break;
+		}
+		std::vector<vec4> data(trace(til,d,s));
+
+		// mutex.lock();
+		passWork(data,til,s);
+		// mutex.unlock();
+
+	}
+
+	//SDL_Delay(0x20);
 
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -96,23 +111,41 @@ void Render::paint(vec4 c, int ix, int iy, int iw, int ih) {
     }
 }
 
-void Render::draw() {
-
-	if(tracer == nullptr) {
-		return;
+bool Render::getWork(Tiling::Tile &til, int &d)
+{
+	if(!tiling.end()) {
+		til = tiling.current();
+		d = det;
+		tiling.next();
+		return true;
 	}
+	else
+	{
+		if(tiling.end() && det < dmax) {
+			tiling.rewind();
+			++det;
+			til = tiling.current();
+			d = det;
+			tiling.next();
+			return true;
+		}
+	}
+	return false;
+}
 
-    Tiling::Tile t = tiling.current();
+std::vector<vec4> Render::trace(const Tiling::Tile &t, int d, int &s) const
+{
+	std::vector<vec4> data;
 
-    int step = 1;
-    if(det < 0) {
-        step <<= -det;
+	int step = 1;
+	if(d < 0) {
+		step <<= -d;
     }
     int fsize = 1;
     double fstep = 1.0;
-    if(det > 0) {
-        fstep /= 1<<det;
-        fsize <<= det;
+	if(d > 0) {
+		fstep /= 1<<d;
+		fsize <<= d;
     }
     for(int iy = t.y; iy < t.y + t.h; iy+=step) {
         for(int ix = t.x; ix < t.x + t.w; ix+=step) {
@@ -128,9 +161,22 @@ void Render::draw() {
 					col = col + tracer->trace(vec2(x,y));
                 }
             }
-            paint(col/(fsize*fsize),ix,iy,step,step);
+
+			col /= fsize*fsize;
+			data.push_back(col);
         }
     }
 
-    tiling.next();
+	s = step;
+	return data;
+}
+
+void Render::passWork(const std::vector<vec4> &data, const Tiling::Tile &t, int step)
+{
+	int i = 0;
+	for(int iy = t.y; iy < t.y + t.h; iy+=step) {
+		for(int ix = t.x; ix < t.x + t.w; ix+=step) {
+			paint(data[i++],ix,iy,step,step);
+		}
+	}
 }

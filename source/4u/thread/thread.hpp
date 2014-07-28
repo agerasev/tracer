@@ -21,6 +21,7 @@ private:
     Runnable *runnable;
     SDL_Thread *thread;
     SDL_ThreadPriority priority;
+	int status;
 
     static int pull(void *data)
     {
@@ -68,6 +69,6 @@ public:
 
     int join()
     {
-        SDL_WaitThread(sdl_thread,&status);
+		SDL_WaitThread(thread,&status);
     }
 };

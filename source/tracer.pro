@@ -2,8 +2,8 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter -Wreorder
+QMAKE_CXXFLAGS += -std=c++11 -O3
+QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
 
 unix {
     LIBS += -lSDL2main -lSDL2 -lGLEW -lGL
@@ -58,7 +58,11 @@ HEADERS += \
     object/sphere.h \
     material/material.h \
     object/object.h \
-    material/specularmaterial.h
+    material/specularmaterial.h \
+    material/diffusematerial.h \
+    material/anisotropicdiffusematerial.h \
+    material/specularanddiffusematerial.h \
+    render/disributor.h
 
 SOURCES += \
     main.cpp \

@@ -7,6 +7,8 @@
 #include"ray.h"
 #include"traceparams.h"
 
+#include<4u/util/const.hpp>
+
 class Scene
 {
 private:
@@ -32,7 +34,7 @@ public:
 	}
 
 public:
-	vec4 trace(const std::vector<Ray> &in, std::vector<Ray> &out, const TraceParams::SceneParam &param)
+	vec4 trace(const std::vector<Ray> &in, std::vector<Ray> &out, const TraceParams::SceneParam &param) const
 	{
 		vec4 color = nullvec4;
 		for(const Ray &r : in)
@@ -43,8 +45,13 @@ public:
 	}
 
 private:
-	vec4 traceRay(const Ray &ray, std::vector<Ray> &out, const TraceParams::SceneParam &param)
+	vec4 traceRay(const Ray &ray, std::vector<Ray> &out, const TraceParams::SceneParam &param) const
 	{
+		if(ray.color.w() < param.min_ray_intensity)
+		{
+			return nullvec4;
+		}
+
 		double record = 0.0;
 		Object *target = nullptr;
 		Object::IntersectState target_state;
@@ -77,8 +84,16 @@ private:
 
 	vec4 diffuse(const vec3 &dir) const
 	{
-		double col = 0.5 + 0.5*dir.y();
-		return vec4(col,col,0.8*col + 0.2,1.0);
+		// double col = 0.5 + 0.5*dir.y();
+		// return vec4(col,col,0.8*col + 0.2,1.0);
+		if(dir*vec3(S32,0.5,0) > 0.98)
+		{
+			return vec4(40,40,40,1);
+		}
+		else
+		{
+			return vec4(0.2,0.2,0.3,1);
+		}
 	}
 };
 

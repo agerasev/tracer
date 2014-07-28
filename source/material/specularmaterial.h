@@ -4,7 +4,7 @@
 #include"material.h"
 #include<4u/la/vec.hpp>
 
-class SpecularMaterial : public Material
+class SpecularMaterial : public virtual Material
 {
 private:
 	vec4 color;
@@ -16,6 +16,16 @@ public:
 
 	}
 
+	virtual vec3 getReflection(const vec3 &d, const vec3 &n) const
+	{
+		return d - (2.0*n*d)*n;
+	}
+
+	vec4 getColor() const
+	{
+		return color;
+	}
+
 	virtual vec4 trace(
 
 			const Ray &ray,
@@ -25,24 +35,7 @@ public:
 
 			) const
 	{
-		vec3 refldir = ray.direction - (2.0*state.normal*ray.direction)*state.normal;
-
-		/* Move distribution computation to materials */
-		/*
-		for(int i = 0; i < 1<<param.rays_density; ++i) {
-			vec3 v = reflection.cont();
-
-			// ambient
-			// buffer.push_back(Ray(*point, v, ray.color*material.ambient/(1<<quality)));
-
-			// diffuse
-			// v = reflection.direct(v);
-			// buffer.push_back(Ray(*point, v, ray.color/(1<<param.rays_density)));
-		}
-		*/
-
-		out.push_back( Ray(state.point, refldir, color & ray.color) );
-
+		out.push_back( Ray(state.point, getReflection(ray.direction, state.normal), getColor() & ray.color) );
 		return nullvec4;
 	}
 };

@@ -15,6 +15,7 @@ public:
 	{
 	public:
 		int rays_density;
+		double min_ray_intensity;
 	};
 
 	SpectatorParam spectator;

@@ -1,11 +1,11 @@
 #ifndef RAND_HPP
 #define RAND_HPP
 
-template <typename T>
+template <typename T, typename ... TArgs>
 class Rand
 {
 public:
-	virtual T get() = 0;
+	virtual T get(TArgs ... args) = 0;
 };
 
 

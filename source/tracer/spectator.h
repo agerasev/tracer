@@ -22,7 +22,8 @@ public:
 		position(pos), orientation(ori), fov(afov) {}
 
 	/* Produces beam emitting from lens to scene */
-	std::vector<Ray> trace(const vec2 &pix, std::vector<Ray> &out, const TraceParams::SpectatorParam &params) {
+	std::vector<Ray> trace(const vec2 &pix, std::vector<Ray> &out, const TraceParams::SpectatorParam &params) const
+	{
 
 		/* plain lens, plain matrix */
 		vec3 dir = orientation*vec3(0,0,-1) + orientation*(fov*vec3(pix.x(),pix.y(),0));
