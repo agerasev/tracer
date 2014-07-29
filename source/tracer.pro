@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=c++11 -O3
+QMAKE_CXXFLAGS += -std=c++11
 QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
 
 unix {
@@ -15,7 +15,6 @@ win32 {
 }
 
 HEADERS += \
-    render/tiling.h \
     4u/exception/exception.hpp \
     4u/exception/filenotfoundexception.hpp \
     4u/gl/fragmentshader.hpp \
@@ -40,7 +39,6 @@ HEADERS += \
     4u/window/glwindow.hpp \
     4u/window/window.hpp \
     4u/exception/glexception.hpp \
-    render/render.h \
     4u/distrib/spheredistrib.hpp \
     4u/rand/rand.hpp \
     4u/rand/contrand.hpp \
@@ -56,18 +54,23 @@ HEADERS += \
     tracer/ray.h \
     tracer/traceparams.h \
     object/sphere.h \
-    material/material.h \
     object/object.h \
+    material/material.h \
     material/specularmaterial.h \
     material/diffusematerial.h \
     material/anisotropicdiffusematerial.h \
     material/specularanddiffusematerial.h \
-    render/disributor.h
+    common/worker.h \
+    common/viewer.h \
+    common/render.h \
+    common/disributor.h \
+    common/slice.h \
+    viewer/localviewer.h \
+    viewer/buffer.h \
+    worker/localworker.h
 
 SOURCES += \
-    main.cpp \
-    render/tiling.cpp \
-    render/render.cpp
+    main.cpp
 
 OTHER_FILES += \
     TODO.md

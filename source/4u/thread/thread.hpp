@@ -1,7 +1,7 @@
 #pragma once
 
-#include<sdl2/sdl.h>
-#include<sdl2/sdl_thread.h>
+#include<SDL2/SDL.h>
+#include<SDL2/SDL_thread.h>
 
 class Runnable {
 public:

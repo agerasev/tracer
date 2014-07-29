@@ -1,7 +1,7 @@
 #ifndef TRACER_H
 #define TRACER_H
 
-#include<render/render.h>
+//#include<render/render.h>
 #include<4u/la/vec.hpp>
 
 #include"traceparams.h"
@@ -13,7 +13,8 @@
 
 #include<material/specularanddiffusematerial.h>
 
-class Tracer : public Render::Tracer {
+class Tracer
+{
 private:
 	Spectator spect;
 	Scene scene;

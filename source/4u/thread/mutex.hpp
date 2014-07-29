@@ -1,9 +1,9 @@
 #ifndef MUTEX_HPP
 #define MUTEX_HPP
 
-#include<sdl2/sdl.h>
-#include<sdl2/sdl_thread.h>
-#include<sdl2/sdl_mutex.h>
+#include<SDL2/SDL.h>
+#include<SDL2/SDL_thread.h>
+#include<SDL2/SDL_mutex.h>
 
 class Mutex
 {
