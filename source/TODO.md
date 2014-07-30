@@ -1,3 +1,6 @@
+# Needed
+- Thread specific random generators
+
 # Features
 - Multithreading
 - OpenMP

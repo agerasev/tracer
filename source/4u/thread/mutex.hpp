@@ -13,27 +13,27 @@ private:
 public:
     inline Mutex()
     {
-        mtx = SDL_CreateMutex();
+		mtx = SDL_CreateMutex();
     }
 
     inline ~Mutex()
     {
-        SDL_DestroyMutex(mtx);
+		SDL_DestroyMutex(mtx);
     }
 
     inline void lock()
     {
-        SDL_LockMutex(mtx);
+		SDL_LockMutex(mtx);
     }
 
     inline void unlock()
     {
-        SDL_UnlockMutex(mtx);
+		SDL_UnlockMutex(mtx);
     }
 
     inline void tryLock()
     {
-        SDL_TryLockMutex(mtx);
+		SDL_TryLockMutex(mtx);
     }
 };
 

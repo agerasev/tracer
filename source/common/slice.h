@@ -15,12 +15,31 @@ private:
 	ivec4 _bounds; /* (x,w,y,h) */
 	vec4 _coords; /* (left,width,down,height) */
 
+protected:
+	float *getData()
+	{
+		return _data;
+	}
+	void setData(float *d)
+	{
+		_data = d;
+	}
+
 public:
+	Slice()
+	{
+
+	}
 	Slice(float *data, int pitch, ivec4 __bounds__, vec4 __coords__)
 		:
 		  _data(data), _pitch(pitch),
 		  _bounds(__bounds__),
 		  _coords(__coords__)
+	{
+
+	}
+
+	virtual ~Slice()
 	{
 
 	}
@@ -54,6 +73,11 @@ public:
 		dst[1] = pix[1];
 		dst[2] = pix[2];
 		dst[3] = pix[3];
+	}
+
+	ivec4 getBounds() const
+	{
+		return _bounds;
 	}
 
 	vec2 getCoord(double ax, double ay) const

@@ -2,7 +2,7 @@ TEMPLATE = app
 CONFIG += console
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -std=c++11 -O3
 QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
 
 unix {
@@ -62,12 +62,13 @@ HEADERS += \
     material/specularanddiffusematerial.h \
     common/worker.h \
     common/viewer.h \
-    common/render.h \
-    common/disributor.h \
     common/slice.h \
     viewer/localviewer.h \
-    viewer/buffer.h \
-    worker/localworker.h
+    worker/localworker.h \
+    director/director.h \
+    viewer/localbuffer.h \
+    director/globalbuffer.h \
+    worker/disributor.h
 
 SOURCES += \
     main.cpp

@@ -63,12 +63,13 @@ public:
 
     void start()
     {
-        if(runnable = nullptr) {return;}
+		if(runnable == nullptr) {return;}
         thread = SDL_CreateThread(pull,"SDL Thread",static_cast<void*>(this));
     }
 
     int join()
     {
 		SDL_WaitThread(thread,&status);
+		return status;
     }
 };

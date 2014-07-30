@@ -1,5 +1,5 @@
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef LOCALBUFFER_H
+#define LOCALBUFFER_H
 
 #include<SDL2/SDL.h>
 #include<GL/glew.h>
@@ -10,7 +10,7 @@
 
 #include<common/slice.h>
 
-class Buffer
+class LocalBuffer
 {
 private:
 	float *color = nullptr;
@@ -21,12 +21,12 @@ private:
 	int slice_size = 2;
 
 public:
-	Buffer()
+	LocalBuffer()
 	{
 		color = new float[4*w*h];
 		point = new float[2*w*h];
 	}
-	~Buffer()
+	~LocalBuffer()
 	{
 		delete[] color;
 		delete[] point;
@@ -139,4 +139,4 @@ public:
 	}
 };
 
-#endif // BUFFER_H
+#endif // LOCALBUFFER_H

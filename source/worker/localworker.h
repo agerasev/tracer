@@ -7,41 +7,101 @@
 #include<4u/thread/thread.hpp>
 #include<4u/thread/mutex.hpp>
 
+#include<queue>
+
 #include<tracer/tracer.h>
 
-class LocalWorker : public Worker
+class LocalWorker : public Worker, public Runnable
 {
 private:
 	Mutex mutex;
-	bool idle;
+	int free;
 
 	Tracer *tracer;
+	bool quited = false;
+
+	std::queue<Slice> tasks;
+
+	Callback *callback;
 
 public:
-	LocalWorker()
-		: idle(true), tracer(new Tracer())
+	LocalWorker(int f = 1)
+		: free(f), tracer(new Tracer())
 	{
 
 	}
 
-	virtual int isIdle()
+	virtual void setCallback(Callback *cb)
+	{
+		callback = cb;
+	}
+
+	virtual int idle()
+	{
+		int ret;
+		mutex.lock();
+		{
+			ret = free - tasks.size();
+		}
+		mutex.unlock();
+		return ret;
+	}
+
+	virtual void give(Slice &slice)
 	{
 		mutex.lock();
 		{
-			return idle;
+			tasks.push(slice);
 		}
 		mutex.unlock();
 	}
 
-	virtual void render(Slice &slice)
+	void renderTasks()
+	{
+		bool br = false;
+		bool fr = true;
+		for(;;)
+		{
+			Slice slice;
+
+			mutex.lock();
+			{
+				if(tasks.empty())
+				{
+					br = true;
+				}
+				else
+				{
+					fr = false;
+					slice = tasks.front();
+					tasks.pop();
+				}
+			}
+			mutex.unlock();
+
+			if(fr)
+			{
+				SDL_Delay(0x10);
+			}
+			if(br)
+			{
+				break;
+			}
+
+			render(slice);
+			callback->done(slice);
+		}
+	}
+
+	void render(Slice &slice)
 	{
 		mutex.lock();
 		{
-			idle = false;
+			--free;
 		}
 		mutex.unlock();
 
-		int detalization = 32;
+		int detalization = 4;
 		for(int iy = 0; iy < slice.h(); ++iy)
 		{
 			for(int ix = 0; ix < slice.w(); ++ix)
@@ -51,13 +111,16 @@ public:
 				{
 					for(int jx = 0; jx < detalization; ++jx)
 					{
-
 						color += tracer->trace(
 									slice.getCoord(
 										ix + static_cast<double>(jx)/detalization - 0.5,
 										iy + static_cast<double>(jy)/detalization - 0.5
 										)
 									);
+						if(quited)
+						{
+							return;
+						}
 					}
 				}
 				slice.setPixel(color/(detalization*detalization),ix,iy);
@@ -66,9 +129,53 @@ public:
 
 		mutex.lock();
 		{
-			idle = true;
+			++free;
 		}
 		mutex.unlock();
+	}
+
+	virtual void interrupt()
+	{
+		mutex.lock();
+		{
+			while(!tasks.empty())
+			{
+				tasks.pop();
+			}
+		}
+		mutex.unlock();
+	}
+
+	void quit()
+	{
+		mutex.lock();
+		{
+			quited = true;
+		}
+		mutex.unlock();
+	}
+
+	virtual void run()
+	{
+		bool br = false;
+		for(;;)
+		{
+			mutex.lock();
+			{
+				if(quited)
+				{
+					br = true;
+				}
+			}
+			mutex.unlock();
+
+			if(br)
+			{
+				break;
+			}
+
+			renderTasks();
+		}
 	}
 };
 

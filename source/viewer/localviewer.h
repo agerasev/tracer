@@ -5,14 +5,15 @@
 
 #include<GL/glew.h>
 
-#include"buffer.h"
+#include"localbuffer.h"
 #include<queue>
 
 #include<4u/window/glwindow.hpp>
 #include<4u/la/vec.hpp>
 #include<4u/thread/mutex.hpp>
 
-#include<common/worker.h>
+#include<director/director.h>
+#include<worker/localworker.h>
 
 class LocalViewer : public Viewer, public GLWindow::Render {
 
@@ -23,40 +24,27 @@ private:
 	/* Server width and height */
 	int gw, gh;
 
-	/* Local shared data */
-	Buffer *buffer;
+	/* Local data */
+	LocalBuffer *buffer;
+
+	/* Shared slice queue */
+	std::queue<Slice> slice_queue;
 	Mutex mutex;
 
-	/* Just for test */
-	Worker *worker;
-	std::vector<Slice>::iterator slice_iterator;
+	bool redraw = true;
 
 public:
-	virtual void init() throw(Exception)
+	LocalViewer()
 	{
-		lw = 0; lh = 0;
-
 		mutex.lock();
 		{
 			gw = 0; gh = 0;
-			buffer = new Buffer();
+			buffer = new LocalBuffer();
 		}
 		mutex.unlock();
-
-		glEnableClientState( GL_VERTEX_ARRAY );
-		glEnableClientState( GL_COLOR_ARRAY );
 	}
 
-	virtual void resize(const GLWindow::Size &s)
-	{
-		lw = s.w; lh = s.h;
-
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		resize(lw,lh);
-	}
-
-	virtual void dispose()
+	virtual ~LocalViewer()
 	{
 		mutex.lock();
 		{
@@ -65,37 +53,83 @@ public:
 		mutex.unlock();
 	}
 
+	virtual void init() throw(Exception)
+	{
+		lw = 0; lh = 0;
+
+		glEnableClientState( GL_VERTEX_ARRAY );
+		glEnableClientState( GL_COLOR_ARRAY );
+
+		redraw = true;
+	}
+
+	virtual void resize(const GLWindow::Size &s)
+	{
+		lw = s.w; lh = s.h;
+
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		redraw = true;
+	}
+
+	virtual void dispose()
+	{
+
+	}
+
 	virtual void display()
 	{
-		if(slice_iterator != buffer->end())
+		/* Prevents big FPS - it's not required here */
+		SDL_Delay(0x40);
+
+		/* Update data from queue */
+		/* Updates local shared data */
+		bool br = false;
+		for(;;)
 		{
-			worker->render(*slice_iterator);
-			++slice_iterator;
-		}
-		else
-		{
-			/* Prevents big FPS - it's not required here */
-			SDL_Delay(0x40);
+			Slice slice;
+			mutex.lock();
+			{
+				if(slice_queue.empty())
+				{
+					br = true;
+				}
+				else
+				{
+					slice = slice_queue.front();
+					slice_queue.pop();
+				}
+			}
+			mutex.unlock();
+
+			if(br)
+			{
+				break;
+			}
+
+			redraw = true;
+			buffer->update(slice);
 		}
 
-		/* Transfers local shared data to GPU
-		 * TODO: Transfer only updated data */
-		mutex.lock();
+		if(redraw)
 		{
+			redraw = false;
+
+			/* Transfers data to GPU
+		 * TODO: Transfer only updated data */
 			glVertexPointer( 2, GL_FLOAT, 0, buffer->getPointData() );
 			glColorPointer( 4, GL_FLOAT, 0, buffer->getColorData() );
 
 			glDrawArrays(GL_POINTS, 0, gw*gh);
 		}
-		mutex.unlock();
 	}
 
-	virtual void update(const Slice &slice)
+	virtual void update(const Slice &s)
 	{
-		/* Updates local shared data */
+		/* Add to queue */
 		mutex.lock();
 		{
-			buffer->update(slice);
+			slice_queue.push(s);
 		}
 		mutex.unlock();
 	}
@@ -107,17 +141,10 @@ public:
 		{
 			gw = w; gh = h;
 			buffer->resize(w,h);
-			slice_iterator = buffer->begin();
 		}
 		mutex.unlock();
 
 		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
-	/* Just for test */
-	void setWorker(Worker *w)
-	{
-		worker = w;
 	}
 };
 
