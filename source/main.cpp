@@ -13,32 +13,64 @@ int main(int argc, char *argv[]) {
 
 	SDL_Init(SDL_INIT_VIDEO);
 
-	int threads = 1;
+	/* Parameters needed for raytracing */
+	TraceParams trace_params = {
+		3,		/* recursion depth */
+		{},
+		{
+			6,		/* rays density */
+			1e-2	/* min ray intencity */
+		}
+	};
+	/* Parameters required by
+	 * rendering infrastructure */
+	RenderParams render_params =
+	{
+		2,		/* thread number */
+		8		/* detailing */
+	};
 
-	GLWindow window("CRendAP",Window::Size(800,600),SDL_WINDOW_RESIZABLE);
+	/* Traces performs ray tracing
+	 * It's the heart of application */
+	Tracer tracer(trace_params);
 
+	/* Worker performs rendering operations and
+	 * distributes them between threads */
+	LocalWorker worker(&tracer,render_params);
+
+	/* Viewer shows rendered images
+	 * It's unnecessary to create it */
 	LocalViewer viewer;
 
-	LocalWorker worker(2*threads);
-	Distributor distributor(&worker);
-
+	/* Director distributes computations between workers
+	 * and sends images to viewers
+	 * It stores rendered data */
 	Director director;
 	director.resize(800,600);
 	Thread thread(&director);
 
+	/* Binds worker and viewer to director */
 	director.add(&worker);
 	director.add(&viewer);
 
+	/* Creates window and sets render */
+	GLWindow window("Tracer",Window::Size(800,600),SDL_WINDOW_RESIZABLE);
 	window.setRender(&viewer);
 
-	distributor.start(threads);
+	/* Starts threads */
+	worker.start();
 	thread.start();
+
+	/* Joins main loop */
 	window.start();
 
+	/* Sends signal you want to quit */
 	director.quit();
 	worker.quit();
+
+	/* Waiting for threads */
 	thread.join();
-	distributor.stop();
+	worker.wait();
 
 	SDL_Quit();
 

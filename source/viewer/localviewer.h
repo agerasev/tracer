@@ -31,7 +31,7 @@ private:
 	std::queue<Slice> slice_queue;
 	Mutex mutex;
 
-	bool redraw = true;
+	int redraw = 2;
 
 public:
 	LocalViewer()
@@ -69,7 +69,7 @@ public:
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		redraw = true;
+		redraw = 2;
 	}
 
 	virtual void dispose()
@@ -107,13 +107,13 @@ public:
 				break;
 			}
 
-			redraw = true;
+			redraw = 2;
 			buffer->update(slice);
 		}
 
-		if(redraw)
+		if(redraw > 0)
 		{
-			redraw = false;
+			--redraw;
 
 			/* Transfers data to GPU
 		 * TODO: Transfer only updated data */

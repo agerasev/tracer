@@ -23,29 +23,12 @@ public:
 	}
 };
 
-class SemiSphericRand : public Rand<vec3>
+class SemiSphericRand : public Rand<vec3, vec3>
 {
 private:
 	SphericRand generator;
-	vec3 normal;
 public:
-	SemiSphericRand()
-	{
-
-	}
-
-	SemiSphericRand(const vec3 &n)
-		: normal(n)
-	{
-
-	}
-
-	void setNormal(const vec3 &n)
-	{
-		normal = n;
-	}
-
-	virtual vec3 get()
+	virtual vec3 get(vec3 normal)
 	{
 		vec3 rand = generator.get();
 		double proj = rand*normal;

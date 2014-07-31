@@ -2,6 +2,7 @@
 #define WORKER_H
 
 #include"slice.h"
+#include"tracer/tracer.h"
 
 class Worker
 {

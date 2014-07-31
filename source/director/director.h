@@ -29,6 +29,9 @@ private:
 	Mutex mutex;
 	std::queue<Slice> slice_queue;
 
+	int rendering_slices = 0;
+	bool dumped = false;
+
 	bool quited = false;
 
 public:
@@ -158,6 +161,7 @@ public:
 					}
 					w->give(*slice_iterator);
 					++slice_iterator;
+					++rendering_slices;
 				}
 				if(ret)
 				{
@@ -170,14 +174,16 @@ public:
 
 	virtual void done(const Slice &s)
 	{
-		//std::cout << "rendered " << s.y() << std::endl;
-		//buffer->save();
-		/* Add to queue */
 		mutex.lock();
 		{
 			slice_queue.push(s);
+			--rendering_slices;
 		}
 		mutex.unlock();
+		if(!dumped && rendering_slices == 0 && slice_iterator == buffer->end())
+		{
+			buffer->save();
+		}
 	}
 
 	void quit()

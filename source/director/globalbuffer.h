@@ -17,7 +17,7 @@ private:
 	int w = 0, h = 0;
 
 	std::vector<Slice> slices;
-	int slice_size = 16;
+	int slice_size = 1;
 
 public:
 	GlobalBuffer()
@@ -113,8 +113,8 @@ public:
 				}
 			}
 		}
-		SDL_SaveBMP(bitmap,"../output/render.bmp");
-		std::cout << "'render.bmp' was saved to 'output'" << std::endl;
+		SDL_SaveBMP(bitmap,"render0000.bmp");
+		//std::cout << "[info] flie was saved" << std::endl;
 	}
 };
 

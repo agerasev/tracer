@@ -20,8 +20,7 @@ public:
 
 	virtual vec3 getReflection(const vec3 &d, const vec3 &n) const
 	{
-		rand->setNormal(n);
-		return rand->get();
+		return rand->get(n);
 	}
 
 	vec4 getColor() const

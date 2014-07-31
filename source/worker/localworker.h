@@ -9,24 +9,30 @@
 
 #include<queue>
 
+#include"disributor.h"
+#include"renderparams.h"
+
 #include<tracer/tracer.h>
 
 class LocalWorker : public Worker, public Runnable
 {
 private:
-	Mutex mutex;
-	int free;
-
 	Tracer *tracer;
 	bool quited = false;
+
+	Mutex mutex;
+	int free;
 
 	std::queue<Slice> tasks;
 
 	Callback *callback;
 
+	Distributor distributor;
+	const RenderParams params;
+
 public:
-	LocalWorker(int f = 1)
-		: free(f), tracer(new Tracer())
+	LocalWorker(Tracer *t, const RenderParams p)
+		: tracer(t), free(p.threads), distributor(this), params(p)
 	{
 
 	}
@@ -101,20 +107,20 @@ public:
 		}
 		mutex.unlock();
 
-		int detalization = 4;
 		for(int iy = 0; iy < slice.h(); ++iy)
 		{
 			for(int ix = 0; ix < slice.w(); ++ix)
 			{
-				vec4 color = vec4(0,0,0,1);
-				for(int jy = 0; jy < detalization; ++jy)
+				vec4 color = nullvec4;
+				for(int jy = 0; jy < params.detailing; ++jy)
 				{
-					for(int jx = 0; jx < detalization; ++jx)
+					vec4 lcolor = nullvec4;
+					for(int jx = 0; jx < params.detailing; ++jx)
 					{
-						color += tracer->trace(
+						lcolor += tracer->trace(
 									slice.getCoord(
-										ix + static_cast<double>(jx)/detalization - 0.5,
-										iy + static_cast<double>(jy)/detalization - 0.5
+										ix + static_cast<double>(jx)/params.detailing - 0.5,
+										iy + static_cast<double>(jy)/params.detailing - 0.5
 										)
 									);
 						if(quited)
@@ -122,8 +128,12 @@ public:
 							return;
 						}
 					}
+					color += lcolor/params.detailing;
 				}
-				slice.setPixel(color/(detalization*detalization),ix,iy);
+				slice.setPixel(
+							color/params.detailing,
+							ix,iy
+							);
 			}
 		}
 
@@ -176,6 +186,16 @@ public:
 
 			renderTasks();
 		}
+	}
+
+	void start()
+	{
+		distributor.start(params.threads);
+	}
+
+	void wait()
+	{
+		distributor.stop();
 	}
 };
 

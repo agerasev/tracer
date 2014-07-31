@@ -3,7 +3,6 @@ CONFIG += console
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -O3
-QMAKE_CXXFLAGS_WARN_OFF -= -Wunused-parameter
 
 unix {
     LIBS += -lSDL2main -lSDL2 -lGLEW -lGL
@@ -68,7 +67,8 @@ HEADERS += \
     director/director.h \
     viewer/localbuffer.h \
     director/globalbuffer.h \
-    worker/disributor.h
+    worker/disributor.h \
+    worker/renderparams.h
 
 SOURCES += \
     main.cpp

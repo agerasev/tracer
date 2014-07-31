@@ -88,7 +88,7 @@ private:
 		// return vec4(col,col,0.8*col + 0.2,1.0);
 		if(dir*vec3(S32,0.5,0) > 0.9)
 		{
-			return vec4(40,40,40,1);
+			return vec4(10,10,10,1);
 		}
 		else
 		{

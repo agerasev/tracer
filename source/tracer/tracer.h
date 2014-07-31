@@ -18,15 +18,12 @@ class Tracer
 private:
 	Spectator spect;
 	Scene scene;
-	TraceParams params;
+	const TraceParams params;
 public:
-	Tracer()
-		: spect(nullvec3,unimat3,0.4)
+	Tracer(const TraceParams p)
+		: spect(nullvec3,unimat3,0.4),
+		  params(p)
 	{
-		params.scene.rays_density = 4;
-		params.recursion_depth = 4;
-		params.scene.min_ray_intensity = 1e-4;
-
 		//Material *m = new DiffuseMaterial(vec4(0.8,0.8,0.8,1));
 
 		SemiSphericRand *rand = new SemiSphericRand();
