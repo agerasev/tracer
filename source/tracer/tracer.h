@@ -10,7 +10,7 @@
 
 #include"traceparams.h"
 #include"scene.h"
-#include"spectator.h"
+#include<spectator/pointspectator.h>
 
 #include<object/object.h>
 #include<object/sphere.h>
@@ -23,25 +23,27 @@
 class Tracer
 {
 private:
-	Spectator spect;
+	Spectator *spect;
 	Scene scene;
 	const TraceParams params;
 public:
 	Tracer(const TraceParams p)
-        : spect(nullvec3,unimat3,0.6),
-		  params(p)
+		: params(p)
 	{
-        scene.addObject(new Sphere(vec3(-1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.8,0.2,0.2,1))));
-        scene.addObject(new Sphere(vec3(1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.2,0.2,0.8,1))));
-		EmittingSphere *emi = new EmittingSphere(vec3(12,24,-16), 4.0, new AbsorbingMaterial(), vec4(1e2,1e2,1e2,1));
+		spect = new PointSpectator(nullvec3,unimat3,0.6,6.0,0.06);
+
+		scene.addObject(new Sphere(vec3(-1.0,0,-6), 1.0, new DiffuseMaterial(vec4(0.8,0.2,0.2,1))));
+		scene.addObject(new Sphere(vec3(1.0,0,-6), 1.0, new DiffuseMaterial(vec4(0.2,0.2,0.8,1))));
+		scene.addObject(new Sphere(vec3(0.2,-0.6,-2), 0.4, new DiffuseMaterial(vec4(0.2,0.8,0.2,1))));
+		EmittingSphere *emi = new EmittingSphere(vec3(12,24,-16), 4.0, new AbsorbingMaterial(), vec4(2e2,2e2,2e2,1));
 		scene.addEmitter(emi);
 		scene.addObject(emi);
 
-		vec3 qv[4] = {vec3(3,-1,-7),vec3(-3,-1,-7),vec3(-3,-1,-1),vec3(3,-1,-1)};
+		vec3 qv[4] = {vec3(5,-1,-9),vec3(-5,-1,-9),vec3(-5,-1,1),vec3(5,-1,1)};
 		scene.addObject(
 					new Quad(
 						qv,
-						new DiffuseMaterial(vec4(0.6,0.6,0.6,1))
+						new DiffuseMaterial(vec4(0.4,0.4,0.4,1))
 						)
 					);
 
@@ -69,7 +71,7 @@ public:
 		std::vector<Ray> *src = &buffer0, *dst = &buffer1;
 
 		/* Get initial beam */
-		spect.trace(pix,*src,params.spectator,rand);
+		spect->trace(pix,*src,params.spectator,rand);
 
 		vec4 color = nullvec4;
 		for(int i = 0; i < params.recursion_depth; ++i)

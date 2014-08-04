@@ -7,8 +7,10 @@
 
 #include<math.h>
 
-class DiskRandStatic
+class DiskRand : public Rand<vec2>
 {
+private:
+	ContRand rand;
 public:
 	static vec2 wrap(ContRand &rand)
 	{
@@ -16,16 +18,9 @@ public:
 		double phi = 2.0*PI*rand.get();
 		return r*vec2(cos(phi),sin(phi));
 	}
-};
-
-class DiskRand : public Rand<vec2>
-{
-private:
-	ContRand rand;
-public:
 	virtual vec2 get()
 	{
-		return DiskRandStatic::wrap(rand);
+		return wrap(rand);
 	}
 };
 

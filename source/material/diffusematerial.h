@@ -25,7 +25,7 @@ public:
 			ContRand &rand
 			) const
 	{
-		return SemiSphericRandStatic::wrap(rand,n);
+		return SemiSphericCosineRand::wrap(rand,n);
 	}
 
 	vec4 getColor() const
@@ -42,8 +42,6 @@ public:
             ContRand &rand
 			) const
 	{
-		double prob = 1.0;
-
         for(const std::pair<vec3,double> &pair : fdir)
         {
 			if(pair.first*state.normal > 0)
@@ -52,10 +50,10 @@ public:
                             Ray(
                                 state.point,
                                 pair.first,
-								2*(pair.first*state.normal)*(getColor() & ray.color)*pair.second
+								2*(state.normal*pair.first)*(getColor() & ray.color)*pair.second,
+								true
 								)
-                            );
-				prob -= pair.second;
+							);
             }
 		}
 
@@ -66,7 +64,7 @@ public:
 						Ray(
 							state.point,
 							dir,
-							2*(dir*state.normal)*prob*(getColor() & ray.color)/param.rays_density
+							(getColor() & ray.color)/param.rays_density
                             )
 						);
 		}

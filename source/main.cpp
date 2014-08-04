@@ -16,10 +16,12 @@ int main(int argc, char *argv[]) {
 	/* Parameters needed for raytracing */
 	TraceParams trace_params = {
 		4,		/* recursion depth */
-		{},
-		{
+		{		/* spectator params */
+			2		/* rays density */
+		},
+		{		/* scene params */
 			2,		/* rays density */
-			1,		/* emitting rays density */
+			2,		/* emitting rays density */
 		}
 	};
 	/* Parameters required by
@@ -27,7 +29,7 @@ int main(int argc, char *argv[]) {
 	RenderParams render_params =
 	{
 		2,		/* thread number */
-		8,		/* detailing */
+		4,		/* detailing */
 	};
 
 	/* Traces performs ray tracing

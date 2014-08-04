@@ -36,11 +36,13 @@ public:
 			const TraceParams::SceneParam &param
 			) const
 	{
-		double k = ((vertex[0] - ray.start)*normal)/(ray.direction*normal);
-		if(k <= 0.0)
+		if(normal*ray.direction >= 0)
 		{
 			return false;
 		}
+
+		double k = ((vertex[0] - ray.start)*normal)/(ray.direction*normal);
+
 		vec3 in = ray.start + ray.direction*k;
 		state.point = in;
 		state.normal = normal;

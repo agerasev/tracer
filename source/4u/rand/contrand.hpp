@@ -24,21 +24,10 @@ public:
 	}
 };
 
-class ContRandStatic
-{
-private:
-	static constexpr double NORM_FACTOR = 1.0/static_cast<double>(0xffffffffu);
-
-public:
-	static double wrap(ContRandInt &rand)
-	{
-		return NORM_FACTOR*rand.get();
-	}
-};
-
 class ContRand : public Rand<double>
 {
 private:
+	static constexpr double NORM_FACTOR = 1.0/static_cast<double>(0xffffffffu);
 	ContRandInt generator;
 
 public:
@@ -48,9 +37,14 @@ public:
 
 	}
 
+	static double wrap(ContRandInt &rand)
+	{
+		return NORM_FACTOR*rand.get();
+	}
+
 	virtual double get()
 	{
-		return ContRandStatic::wrap(generator);
+		return wrap(generator);
 	}
 };
 

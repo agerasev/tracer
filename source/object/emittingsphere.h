@@ -9,7 +9,7 @@
 
 #include<4u/la/vec.hpp>
 #include<4u/util/op.hpp>
-#include<4u/rand/diskrand.h>
+#include<4u/rand/diskrand.hpp>
 
 class EmittingSphere : public Sphere, public Emitter
 {
@@ -32,7 +32,7 @@ public:
 			ContRand &rand
 			) const
 	{
-		return Sphere::trace(ray,out,state,fdir,param,rand) + (glow & ray.color);
+		return Sphere::trace(ray,out,state,fdir,param,rand) + (ray.emitted ? (glow & ray.color) : nullvec4);
 	}
 
 	virtual void attract(
@@ -61,11 +61,11 @@ public:
 
 		for(int i = 0; i < param.emitting_rays_density; ++i)
 		{
-            vec2 zeta = DiskRandStatic::wrap(rand);
+			vec2 zeta = DiskRand::wrap(rand);
             fdir.push_back(
                         std::pair<vec3,double>(
 							norm(h*(zeta.x()*bx + zeta.y()*by) + (1.0 - sqr(getRadius())/sqr(dist))*dist),
-                            prob
+							prob/param.emitting_rays_density
                             )
                         );
         }

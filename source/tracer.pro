@@ -48,7 +48,6 @@ HEADERS += \
     4u/window/sdlwindow.hpp \
     4u/window/window.hpp \
     4u/window/glxwindow.hpp \
-    tracer/spectator.h \
     tracer/tracer.h \
     tracer/scene.h \
     tracer/ray.h \
@@ -73,10 +72,12 @@ HEADERS += \
     object/emitter.h \
     object/emittingsphere.h \
     material/absorbingmaterial.h \
-    4u/rand/diskrand.h \
     tracer/light.h \
     object/triangle.h \
-    object/quad.h
+    object/quad.h \
+    spectator/pointspectator.h \
+    spectator/spectator.h \
+    4u/rand/diskrand.hpp
 
 SOURCES += \
     main.cpp

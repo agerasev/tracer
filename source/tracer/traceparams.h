@@ -9,7 +9,7 @@ public:
 	class SpectatorParam
 	{
 	public:
-
+		int rays_density;
 	};
 	class SceneParam
 	{
