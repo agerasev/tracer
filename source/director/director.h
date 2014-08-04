@@ -182,6 +182,7 @@ public:
 		mutex.unlock();
 		if(!dumped && rendering_slices == 0 && slice_iterator == buffer->end())
 		{
+			std::cout << SDL_GetTicks()/1000.0 << " seconds" << std::endl;
 			buffer->save();
 		}
 	}

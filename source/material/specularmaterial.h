@@ -16,7 +16,11 @@ public:
 
 	}
 
-	virtual vec3 getReflection(const vec3 &d, const vec3 &n) const
+	virtual vec3 getReflection(
+			const vec3 &d,
+			const vec3 &n,
+			ContRand &rand
+			) const
 	{
 		return d - (2.0*n*d)*n;
 	}
@@ -27,15 +31,15 @@ public:
 	}
 
 	virtual vec4 trace(
-
 			const Ray &ray,
 			std::vector<Ray> &out,
 			const Object::IntersectState &state,
-			const TraceParams::SceneParam &param
-
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
 			) const
 	{
-		out.push_back( Ray(state.point, getReflection(ray.direction, state.normal), getColor() & ray.color) );
+		out.push_back( Ray(state.point, getReflection(ray.direction, state.normal, rand), getColor() & ray.color) );
 		return nullvec4;
 	}
 };

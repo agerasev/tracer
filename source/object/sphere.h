@@ -23,12 +23,23 @@ public:
 
 	}
 
-	virtual double getSize() const
+	double getRadius() const
 	{
 		return radius;
 	}
 
-	virtual bool intersect(const Ray &ray, IntersectState &state, const TraceParams::SceneParam &param) const
+	/*
+	virtual double getSize() const
+	{
+		return radius;
+	}
+	*/
+
+	virtual bool intersect(
+			const Ray &ray,
+			IntersectState &state,
+			const TraceParams::SceneParam &param
+			) const
 	{
 		double closest = (getPosition() - ray.start)*ray.direction;
 		if(closest < 0.0) {
@@ -49,9 +60,16 @@ public:
 		return true;
 	}
 
-	virtual vec4 trace(const Ray &ray, std::vector<Ray> &out, const IntersectState &state, const TraceParams::SceneParam &param) const
+	virtual vec4 trace(
+			const Ray &ray,
+			std::vector<Ray> &out,
+			const IntersectState &state,
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
+			) const
 	{
-		return material->trace(ray,out,state,param);
+		return material->trace(ray,out,state,fdir,param,rand);
 	}
 };
 

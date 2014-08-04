@@ -9,7 +9,7 @@ private:
 	double diffusion;
 
 public:
-	AnisotropicDiffuseMaterial(const vec4 &c, SemiSphericRand *r, double d)
+	AnisotropicDiffuseMaterial(const vec4 &c, double d)
 		: DiffuseMaterial(c,r), diffusion(d)
 	{
 
@@ -33,7 +33,9 @@ public:
 			const Ray &ray,
 			std::vector<Ray> &out,
 			const Object::IntersectState &state,
-			const TraceParams::SceneParam &param
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
 			) const
 	{
 

@@ -6,6 +6,7 @@
 
 #include<4u/thread/thread.hpp>
 #include<4u/thread/mutex.hpp>
+#include<4u/rand/contrand.hpp>
 
 #include<queue>
 
@@ -22,6 +23,7 @@ private:
 
 	Mutex mutex;
 	int free;
+	ContRandInt init_rand;
 
 	std::queue<Slice> tasks;
 
@@ -32,7 +34,7 @@ private:
 
 public:
 	LocalWorker(Tracer *t, const RenderParams p)
-		: tracer(t), free(p.threads), distributor(this), params(p)
+		: tracer(t), free(2*p.threads), init_rand(), distributor(this), params(p)
 	{
 
 	}
@@ -62,7 +64,7 @@ public:
 		mutex.unlock();
 	}
 
-	void renderTasks()
+	void renderTasks(ContRand &rand)
 	{
 		bool br = false;
 		bool fr = true;
@@ -94,12 +96,12 @@ public:
 				break;
 			}
 
-			render(slice);
+			render(slice,rand);
 			callback->done(slice);
 		}
 	}
 
-	void render(Slice &slice)
+	void render(Slice &slice, ContRand &rand)
 	{
 		mutex.lock();
 		{
@@ -121,7 +123,8 @@ public:
 									slice.getCoord(
 										ix + static_cast<double>(jx)/params.detailing - 0.5,
 										iy + static_cast<double>(jy)/params.detailing - 0.5
-										)
+										),
+									rand
 									);
 						if(quited)
 						{
@@ -167,6 +170,10 @@ public:
 
 	virtual void run()
 	{
+		mutex.lock();
+		ContRand rand(0x562f1091*init_rand.get());
+		mutex.unlock();
+
 		bool br = false;
 		for(;;)
 		{
@@ -184,7 +191,7 @@ public:
 				break;
 			}
 
-			renderTasks();
+			renderTasks(rand);
 		}
 	}
 

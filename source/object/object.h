@@ -5,10 +5,10 @@
 
 #include<4u/la/vec.hpp>
 #include<4u/la/mat.hpp>
+#include<4u/rand/contrand.hpp>
+
 #include<tracer/ray.h>
 #include<tracer/traceparams.h>
-
-#include"object.h"
 
 class Object
 {
@@ -36,15 +36,28 @@ public:
 
 	/* Bounding radius of object is used
 	 * to searching for intersections faster */
+	/*
 	virtual double getSize() const = 0;
+	*/
 
 	/* Method used to find closest intersection point
 	 * without secondary raycasting */
-	virtual bool intersect(const Ray &ray, IntersectState &state, const TraceParams::SceneParam &param) const = 0;
+	virtual bool intersect(
+			const Ray &ray,
+			IntersectState &state,
+			const TraceParams::SceneParam &param
+			) const = 0;
 
 	/* Causes next reytracing iterations after intersection point was founded.
 	 * Produces secondary rays and returns emitting light */
-	virtual vec4 trace(const Ray &ray, std::vector<Ray> &out, const IntersectState &state, const TraceParams::SceneParam &param) const = 0;
+	virtual vec4 trace(
+			const Ray &ray,
+			std::vector<Ray> &out,
+			const IntersectState &state,
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
+			) const = 0;
 };
 
 #endif // OBJECT_H

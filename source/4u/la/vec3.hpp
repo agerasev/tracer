@@ -101,7 +101,11 @@ inline tvecn<T,3> operator /(const tvecn<T,3> &b, T a) {
 // Cross product
 template <typename T>
 inline tvecn<T,3> operator ^(const tvecn<T,3> &a, const tvecn<T,3> &b) {
-	return a(0)*b(1) - a(1)*b(0);
+    return tvecn<T,3>(
+                a[1]*b[2] - b[1]*a[2],
+                a[2]*b[0] - b[2]*a[0],
+                a[0]*b[1] - b[0]*a[1]
+                );
 }
 
 #endif // VEC3_HPP

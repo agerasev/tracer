@@ -4,59 +4,77 @@
 #include<list>
 
 #include<object/object.h>
+#include<object/emitter.h>
+
 #include"ray.h"
 #include"traceparams.h"
 
 #include<4u/util/const.hpp>
+#include<4u/rand/rand.hpp>
 
 class Scene
 {
 private:
-	std::list<Object*> container;
-
+    std::list<Object*> objects;
+	std::list<Emitter*> emitters;
 public:
 	/* Methods for objects placing */
-	void add(Object *obj)
+    void addObject(Object *obj)
 	{
-		container.push_back(obj);
+        objects.push_back(obj);
 	}
-	void remove(Object *obj)
+    void removeObject(Object *obj)
 	{
-		container.remove(obj);
+        objects.remove(obj);
 	}
-	std::list<Object*>::iterator begin()
+    std::list<Object*> *getObjects()
+    {
+        return &objects;
+    }
+
+    /* Methods for emitters placing */
+	void addEmitter(Emitter *obj)
+    {
+        emitters.push_back(obj);
+    }
+    void removeEmitter(Emitter *obj)
+    {
+        emitters.remove(obj);
+    }
+    std::list<Emitter*> *getEmitters()
 	{
-		return container.begin();
-	}
-	std::list<Object*>::iterator end()
-	{
-		return container.end();
+        return &emitters;
 	}
 
 public:
-	vec4 trace(const std::vector<Ray> &in, std::vector<Ray> &out, const TraceParams::SceneParam &param) const
+	vec4 trace(
+			const std::vector<Ray> &in,
+			std::vector<Ray> &out,
+			const TraceParams::SceneParam &param,
+			ContRand &rand
+			) const
 	{
 		vec4 color = nullvec4;
 		for(const Ray &r : in)
 		{
-			color += traceRay(r,out,param);
+			color += traceRay(r,out,param,rand);
 		}
 		return color;
 	}
 
 private:
-	vec4 traceRay(const Ray &ray, std::vector<Ray> &out, const TraceParams::SceneParam &param) const
+	vec4 traceRay(
+			const Ray &ray,
+			std::vector<Ray> &out,
+			const TraceParams::SceneParam &param,
+			ContRand &rand
+			) const
 	{
-		if(ray.color.w() < param.min_ray_intensity)
-		{
-			return nullvec4;
-		}
-
 		double record = 0.0;
 		Object *target = nullptr;
 		Object::IntersectState target_state;
 
-		for(Object *obj : container)
+        for(Object *obj : objects)
 		{
 			Object::IntersectState state;
 
@@ -76,7 +94,12 @@ private:
 
 		if(target != nullptr)
 		{
-			return target->trace(ray,out,target_state,param);
+			std::vector< std::pair<vec3,double> > force_dir;
+            for(Emitter *emi : emitters)
+            {
+                emi->attract(target_state.point,force_dir,param,rand);
+			}
+			return target->trace(ray,out,target_state,force_dir,param,rand);
 		}
 
 		return diffuse(ray.direction) & ray.color;
@@ -86,14 +109,8 @@ private:
 	{
 		// double col = 0.5 + 0.5*dir.y();
 		// return vec4(col,col,0.8*col + 0.2,1.0);
-		if(dir*vec3(S32,0.5,0) > 0.9)
-		{
-			return vec4(10,10,10,1);
-		}
-		else
-		{
-			return vec4(0.2,0.2,0.3,1);
-		}
+		// return vec4(0.2,0.2,0.3,1);
+		return vec4(0,0,0,1);
 	}
 };
 

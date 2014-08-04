@@ -5,22 +5,27 @@
 
 #include"material.h"
 
+#include<iostream>
+
 class DiffuseMaterial : public virtual Material
 {
 private:
-	SemiSphericRand *rand;
 	vec4 color;
 
 public:
-	DiffuseMaterial(const vec4 &c, SemiSphericRand *r)
-		: Material(), rand(r), color(c)
+	DiffuseMaterial(const vec4 &c)
+		: Material(), color(c)
 	{
 
 	}
 
-	virtual vec3 getReflection(const vec3 &d, const vec3 &n) const
+	virtual vec3 getReflection(
+			const vec3 &d,
+			const vec3 &n,
+			ContRand &rand
+			) const
 	{
-		return rand->get(n);
+		return SemiSphericRandStatic::wrap(rand,n);
 	}
 
 	vec4 getColor() const
@@ -32,18 +37,37 @@ public:
 			const Ray &ray,
 			std::vector<Ray> &out,
 			const Object::IntersectState &state,
-			const TraceParams::SceneParam &param
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
 			) const
 	{
+		double prob = 1.0;
 
+        for(const std::pair<vec3,double> &pair : fdir)
+        {
+			if(pair.first*state.normal > 0)
+			{
+                out.push_back(
+                            Ray(
+                                state.point,
+                                pair.first,
+								2*(pair.first*state.normal)*(getColor() & ray.color)*pair.second
+								)
+                            );
+				prob -= pair.second;
+            }
+		}
 
-		for(int i = 0; i < param.rays_density; ++i)
+        for(int i = 0; i < param.rays_density; ++i)
 		{
+			vec3 dir = getReflection(ray.direction,state.normal,rand);
 			out.push_back(
 						Ray(
 							state.point,
-							getReflection(ray.direction,state.normal),
-							(getColor() & ray.color)/param.rays_density)
+							dir,
+							2*(dir*state.normal)*prob*(getColor() & ray.color)/param.rays_density
+                            )
 						);
 		}
 

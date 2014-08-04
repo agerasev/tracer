@@ -3,6 +3,8 @@
 
 #include<object/object.h>
 
+#include<4u/rand/rand.hpp>
+
 class Material
 {
 public:
@@ -10,7 +12,9 @@ public:
 			const Ray &ray,
 			std::vector<Ray> &out,
 			const Object::IntersectState &state,
-			const TraceParams::SceneParam &param
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
 			) const = 0;
 };
 

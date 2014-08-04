@@ -10,20 +10,27 @@ class SpecularAndDiffuseMaterial : public SpecularMaterial, public DiffuseMateri
 private:
 	double factor;
 public:
-	SpecularAndDiffuseMaterial(vec4 spec_color, vec4 diff_color, SemiSphericRand *diff_rand, double spec_factor)
+	SpecularAndDiffuseMaterial(vec4 spec_color, vec4 diff_color, double spec_factor)
 		:
 		  SpecularMaterial(spec_color),
-		  DiffuseMaterial(diff_color,diff_rand),
+		  DiffuseMaterial(diff_color),
 		  factor(spec_factor)
 	{
 
 	}
-	virtual vec4 trace(const Ray &ray, std::vector<Ray> &out, const Object::IntersectState &state, const TraceParams::SceneParam &param) const
+	virtual vec4 trace(
+			const Ray &ray,
+			std::vector<Ray> &out,
+			const Object::IntersectState &state,
+			const std::vector< std::pair<vec3,double> > &fdir,
+			const TraceParams::SceneParam &param,
+            ContRand &rand
+			) const
 	{
 		out.push_back(
 					Ray(
 						state.point,
-						SpecularMaterial::getReflection(ray.direction, state.normal),
+						SpecularMaterial::getReflection(ray.direction, state.normal, rand),
 						factor*(SpecularMaterial::getColor() & ray.color)
 						)
 					);
@@ -33,7 +40,7 @@ public:
 			out.push_back(
 						Ray(
 							state.point,
-							DiffuseMaterial::getReflection(ray.direction, state.normal),
+							DiffuseMaterial::getReflection(ray.direction, state.normal, rand),
 							(1.0 - factor)/(param.rays_density - 1)*(DiffuseMaterial::getColor() & ray.color))
 						);
 		}

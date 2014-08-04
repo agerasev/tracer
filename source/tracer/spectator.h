@@ -3,6 +3,7 @@
 
 #include<4u/la/vec.hpp>
 #include<4u/la/mat.hpp>
+#include<4u/rand/rand.hpp>
 
 #include<object/object.h>
 #include"ray.h"
@@ -22,7 +23,7 @@ public:
 		position(pos), orientation(ori), fov(afov) {}
 
 	/* Produces beam emitting from lens to scene */
-	std::vector<Ray> trace(const vec2 &pix, std::vector<Ray> &out, const TraceParams::SpectatorParam &params) const
+	std::vector<Ray> trace(const vec2 &pix, std::vector<Ray> &out, const TraceParams::SpectatorParam &params, ContRand &rand) const
 	{
 
 		/* plain lens, plain matrix */

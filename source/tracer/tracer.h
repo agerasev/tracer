@@ -1,8 +1,12 @@
 #ifndef TRACER_H
 #define TRACER_H
 
+#include<vector>
+
 //#include<render/render.h>
 #include<4u/la/vec.hpp>
+#include<4u/rand/rand.hpp>
+#include<4u/util/op.hpp>
 
 #include"traceparams.h"
 #include"scene.h"
@@ -10,8 +14,11 @@
 
 #include<object/object.h>
 #include<object/sphere.h>
+#include<object/emittingsphere.h>
+#include<object/quad.h>
 
 #include<material/specularanddiffusematerial.h>
+#include<material/absorbingmaterial.h>
 
 class Tracer
 {
@@ -21,15 +28,22 @@ private:
 	const TraceParams params;
 public:
 	Tracer(const TraceParams p)
-		: spect(nullvec3,unimat3,0.4),
+        : spect(nullvec3,unimat3,0.6),
 		  params(p)
 	{
-		//Material *m = new DiffuseMaterial(vec4(0.8,0.8,0.8,1));
+        scene.addObject(new Sphere(vec3(-1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.8,0.2,0.2,1))));
+        scene.addObject(new Sphere(vec3(1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.2,0.2,0.8,1))));
+		EmittingSphere *emi = new EmittingSphere(vec3(12,24,-16), 4.0, new AbsorbingMaterial(), vec4(1e2,1e2,1e2,1));
+		scene.addEmitter(emi);
+		scene.addObject(emi);
 
-		SemiSphericRand *rand = new SemiSphericRand();
-
-		scene.add(new Sphere(vec3(-1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.8,0.2,0.2,1),rand)));
-		scene.add(new Sphere(vec3(1.0,0,-4), 1.0, new DiffuseMaterial(vec4(0.2,0.2,0.8,1),rand)));
+		vec3 qv[4] = {vec3(3,-1,-7),vec3(-3,-1,-7),vec3(-3,-1,-1),vec3(3,-1,-1)};
+		scene.addObject(
+					new Quad(
+						qv,
+						new DiffuseMaterial(vec4(0.6,0.6,0.6,1))
+						)
+					);
 
 		/*
 		for(int ix = 0; ix < 3; ++ix)
@@ -44,19 +58,24 @@ public:
 		}
 		*/
 	}
-	virtual vec4 trace(const vec2 &pix) const
+	virtual vec4 trace(const vec2 &pix, ContRand &rand) const
 	{
 		std::vector<Ray> buffer0, buffer1;
+
+		int max_rays = _pow(params.scene.rays_density,params.recursion_depth);
+		buffer0.reserve(max_rays);
+		buffer1.reserve(max_rays);
+
 		std::vector<Ray> *src = &buffer0, *dst = &buffer1;
 
 		/* Get initial beam */
-		spect.trace(pix,*src,params.spectator);
+		spect.trace(pix,*src,params.spectator,rand);
 
 		vec4 color = nullvec4;
 		for(int i = 0; i < params.recursion_depth; ++i)
 		{
 			/* Raytrace */
-			color += scene.trace(*src,*dst,params.scene);
+			color += scene.trace(*src,*dst,params.scene,rand);
 
 			/* Clear src */
 			src->clear();
