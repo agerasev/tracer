@@ -8,15 +8,19 @@
 class SpecularAndDiffuseMaterial : public SpecularMaterial, public DiffuseMaterial
 {
 private:
-	double factor;
+	double specularity;
 public:
-	SpecularAndDiffuseMaterial(vec4 spec_color, vec4 diff_color, double spec_factor)
+	SpecularAndDiffuseMaterial(double spec_factor, vec4 diff_color, vec4 spec_color = vec4(1,1,1,1))
 		:
-		  SpecularMaterial(spec_color),
 		  DiffuseMaterial(diff_color),
-		  factor(spec_factor)
+		  SpecularMaterial(spec_color),
+		  specularity(spec_factor)
 	{
 
+	}
+	virtual bool isAttractive() const
+	{
+		return true;
 	}
 	virtual vec4 trace(
 			const Ray &ray,
@@ -24,27 +28,12 @@ public:
 			const Object::IntersectState &state,
 			const std::vector< std::pair<vec3,double> > &fdir,
 			const TraceParams::SceneParam &param,
-            ContRand &rand
+			ContRand &rand,
+			double weight = 1.0
 			) const
 	{
-		out.push_back(
-					Ray(
-						state.point,
-						SpecularMaterial::getReflection(ray.direction, state.normal, rand),
-						factor*(SpecularMaterial::getColor() & ray.color)
-						)
-					);
-
-		for(int i = 0; i < param.rays_density - 1; ++i)
-		{
-			out.push_back(
-						Ray(
-							state.point,
-							DiffuseMaterial::getReflection(ray.direction, state.normal, rand),
-							(1.0 - factor)/(param.rays_density - 1)*(DiffuseMaterial::getColor() & ray.color))
-						);
-		}
-
+		SpecularMaterial::trace(ray,out,state,fdir,param,rand,weight*specularity);
+		DiffuseMaterial::trace(ray,out,state,fdir,param,rand,weight*(1.0 - specularity));
 		return nullvec4;
 	}
 };

@@ -3,6 +3,8 @@
 
 #include"object.h"
 
+#include<4u/util/const.hpp>
+
 #include<material/material.h>
 
 class Quad : public Object
@@ -30,18 +32,39 @@ public:
 	}
 	*/
 
+	virtual bool isAttractive() const
+	{
+
+	}
+
 	virtual bool intersect(
 			const Ray &ray,
 			IntersectState &state,
 			const TraceParams::SceneParam &param
 			) const
 	{
-		if(normal*ray.direction >= 0)
+		double side = normal*ray.direction;
+		if(ray.flag & Ray::INSIDE)
+		{
+			if(side < 0.0)
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if(side > 0.0)
+			{
+				return false;
+			}
+		}
+
+		double k = (((vertex[0]) - ray.start)*normal)/(ray.direction*normal);
+
+		if(k <= 0.0)
 		{
 			return false;
 		}
-
-		double k = ((vertex[0] - ray.start)*normal)/(ray.direction*normal);
 
 		vec3 in = ray.start + ray.direction*k;
 		state.point = in;

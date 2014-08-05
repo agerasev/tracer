@@ -4,7 +4,7 @@
 #include<list>
 
 #include<object/object.h>
-#include<object/emitter.h>
+#include<object/attractor.h>
 
 #include"ray.h"
 #include"traceparams.h"
@@ -16,7 +16,7 @@ class Scene
 {
 private:
     std::list<Object*> objects;
-	std::list<Emitter*> emitters;
+	std::list<Attractor*> attractors;
 public:
 	/* Methods for objects placing */
     void addObject(Object *obj)
@@ -32,18 +32,18 @@ public:
         return &objects;
     }
 
-    /* Methods for emitters placing */
-	void addEmitter(Emitter *obj)
+	/* Methods for attractors placing */
+	void addAttractor(Attractor *obj)
     {
-        emitters.push_back(obj);
+		attractors.push_back(obj);
     }
-    void removeEmitter(Emitter *obj)
+	void removeAttractor(Attractor *obj)
     {
-        emitters.remove(obj);
+		attractors.remove(obj);
     }
-    std::list<Emitter*> *getEmitters()
+	std::list<Attractor*> *getAttractors()
 	{
-        return &emitters;
+		return &attractors;
 	}
 
 public:
@@ -95,9 +95,12 @@ private:
 		if(target != nullptr)
 		{
 			std::vector< std::pair<vec3,double> > force_dir;
-            for(Emitter *emi : emitters)
-            {
-                emi->attract(target_state.point,force_dir,param,rand);
+			if(target->isAttractive())
+			{
+				for(Attractor *emi : attractors)
+				{
+					emi->attract(target_state.point,force_dir,param,rand);
+				}
 			}
 			return target->trace(ray,out,target_state,force_dir,param,rand);
 		}

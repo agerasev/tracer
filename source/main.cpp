@@ -15,13 +15,13 @@ int main(int argc, char *argv[]) {
 
 	/* Parameters needed for raytracing */
 	TraceParams trace_params = {
-		4,		/* recursion depth */
+		6,		/* recursion depth */
 		{		/* spectator params */
-			2		/* rays density */
+			1		/* rays density */
 		},
 		{		/* scene params */
 			2,		/* rays density */
-			2,		/* emitting rays density */
+			1,		/* attracting rays density */
 		}
 	};
 	/* Parameters required by

@@ -69,15 +69,19 @@ HEADERS += \
     director/globalbuffer.h \
     worker/disributor.h \
     worker/renderparams.h \
-    object/emitter.h \
-    object/emittingsphere.h \
     material/absorbingmaterial.h \
     tracer/light.h \
     object/triangle.h \
     object/quad.h \
     spectator/pointspectator.h \
     spectator/spectator.h \
-    4u/rand/diskrand.hpp
+    4u/rand/diskrand.hpp \
+    material/transparentmaterial.h \
+    material/emittingmaterial.h \
+    object/attractor.h \
+    object/attractingsphere.h \
+    object/plane.h \
+    material/specularandtransparentmaterial.h
 
 SOURCES += \
     main.cpp

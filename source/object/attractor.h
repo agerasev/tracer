@@ -1,12 +1,12 @@
-#ifndef EMITTER_H
-#define EMITTER_H
+#ifndef ATTRACTOR_H
+#define ATTRACTOR_H
 
 #include<utility>
 
 #include<4u/la/vec.hpp>
 #include<4u/rand/contrand.hpp>
 
-class Emitter
+class Attractor
 {
 public:
 	/* Returns vector directed to emitter from given point
@@ -19,4 +19,4 @@ public:
 			) const = 0;
 };
 
-#endif // EMITTER_H
+#endif // ATTRACTOR_H

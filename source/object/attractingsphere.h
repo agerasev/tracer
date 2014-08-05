@@ -2,7 +2,7 @@
 #define EMITTINGSPHERE_H
 
 #include"sphere.h"
-#include"emitter.h"
+#include"attractor.h"
 
 #include<vector>
 #include<utility>
@@ -11,28 +11,13 @@
 #include<4u/util/op.hpp>
 #include<4u/rand/diskrand.hpp>
 
-class EmittingSphere : public Sphere, public Emitter
+class AttractingSphere : public Sphere, public Attractor
 {
-private:
-	vec4 glow;
-
 public:
-	EmittingSphere(const vec3 &pos, double rad, const Material *mat, const vec4 &g)
-		: Sphere(pos,rad,mat), glow(g)
+	AttractingSphere(const vec3 &pos, double rad, const Material *mat)
+		: Sphere(pos,rad,mat)
 	{
 
-	}
-
-	virtual vec4 trace(
-			const Ray &ray,
-            std::vector<Ray> &out,
-			const IntersectState &state,
-			const std::vector< std::pair<vec3,double> > &fdir,
-			const TraceParams::SceneParam &param,
-			ContRand &rand
-			) const
-	{
-		return Sphere::trace(ray,out,state,fdir,param,rand) + (ray.emitted ? (glow & ray.color) : nullvec4);
 	}
 
 	virtual void attract(
@@ -59,13 +44,13 @@ public:
         }
 		double h = getRadius()*cosa;
 
-		for(int i = 0; i < param.emitting_rays_density; ++i)
+		for(int i = 0; i < param.attracting_rays_density; ++i)
 		{
 			vec2 zeta = DiskRand::wrap(rand);
             fdir.push_back(
                         std::pair<vec3,double>(
 							norm(h*(zeta.x()*bx + zeta.y()*by) + (1.0 - sqr(getRadius())/sqr(dist))*dist),
-							prob/param.emitting_rays_density
+							prob/param.attracting_rays_density
                             )
                         );
         }

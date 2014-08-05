@@ -61,7 +61,14 @@ public:
 			vec2 ex2d = radius*DiskRand::wrap(rand);
 			vec3 ex3d = orientation*(vec3(ex2d.x(),ex2d.y(),0));
 			vec3 ldir = norm(foc - ex3d);
-			out.push_back(Ray(position + ex3d, ldir, vec4(1,1,1,1)/params.rays_density, true));
+			out.push_back(
+						Ray(
+							position + ex3d,
+							ldir,
+							vec4(1,1,1,1)/params.rays_density,
+							Ray::DIFFUSE | Ray::EMITTED
+							)
+						);
 		}
 	}
 };

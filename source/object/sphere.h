@@ -4,9 +4,12 @@
 #include<cmath>
 #include<vector>
 
+#include<4u/util/const.hpp>
+#include<4u/util/op.hpp>
+
 #include<object/object.h>
 
-#include<material/specularmaterial.h>
+#include<material/material.h>
 
 class Sphere : public Object
 {
@@ -35,6 +38,11 @@ public:
 	}
 	*/
 
+	virtual bool isAttractive() const
+	{
+		return material->isAttractive();
+	}
+
 	virtual bool intersect(
 			const Ray &ray,
 			IntersectState &state,
@@ -42,14 +50,24 @@ public:
 			) const
 	{
 		double closest = (getPosition() - ray.start)*ray.direction;
+		/*
 		if(closest < 0.0) {
 			return false;
 		}
+		*/
 		double dist2 = sqr(getPosition() - (ray.direction*closest + ray.start));
-		if(dist2 > radius*radius) {
+		if(dist2 > sqr(radius)) {
 			return false;
 		}
-		double entry = closest - sqrt(radius*radius - dist2);
+		double entry;
+		if(ray.flag & Ray::INSIDE)
+		{
+			entry = closest + sqrt(sqr(radius) - dist2);
+		}
+		else
+		{
+			entry = closest - sqrt(sqr(radius) - dist2);
+		}
 		if(entry < 0.0) {
 			return false;
 		}

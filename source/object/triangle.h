@@ -48,7 +48,11 @@ public:
 			const TraceParams::SceneParam &param,
 			ContRand &rand) const
 	{
-		return material->trace(ray,out,state,param,rand);
+		if(ray.flag & Ray::DIFFUSE)
+		{
+			return material->trace(ray,out,state,fdir,param,rand);
+		}
+		return nullvec4;
 	}
 };
 

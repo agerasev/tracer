@@ -15,6 +15,11 @@ public:
 
 	}
 
+	virtual bool isAttractive() const
+	{
+		return true;
+	}
+
 	vec3 direct(const vec3 &diffuse_direction, const vec3 &direction, const vec3 &normal) const
 	{
 		//setting divergence
@@ -35,7 +40,8 @@ public:
 			const Object::IntersectState &state,
 			const std::vector< std::pair<vec3,double> > &fdir,
 			const TraceParams::SceneParam &param,
-            ContRand &rand
+			ContRand &rand,
+			double weight = 1.0
 			) const
 	{
 

@@ -83,7 +83,7 @@ inline T operator *(const tvecn<T,N> &a, const tvecn<T,N> &b) {
 // Derivative operations
 template<typename T, typename S, int N>
 inline tvecn<T,N> operator *(const tvecn<T,N> &b, S a) {
-    return a*b;
+	return static_cast<T>(a)*b;
 }
 template<typename T, int N>
 inline tvecn<T,N> operator -(const tvecn<T,N> &a) {

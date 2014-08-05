@@ -40,6 +40,8 @@ public:
 	virtual double getSize() const = 0;
 	*/
 
+	virtual bool isAttractive() const = 0;
+
 	/* Method used to find closest intersection point
 	 * without secondary raycasting */
 	virtual bool intersect(

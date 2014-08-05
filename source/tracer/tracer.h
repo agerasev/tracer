@@ -14,11 +14,12 @@
 
 #include<object/object.h>
 #include<object/sphere.h>
-#include<object/emittingsphere.h>
+#include<object/attractingsphere.h>
 #include<object/quad.h>
 
 #include<material/specularanddiffusematerial.h>
-#include<material/absorbingmaterial.h>
+#include<material/specularandtransparentmaterial.h>
+#include<material/emittingmaterial.h>
 
 class Tracer
 {
@@ -30,13 +31,24 @@ public:
 	Tracer(const TraceParams p)
 		: params(p)
 	{
-		spect = new PointSpectator(nullvec3,unimat3,0.6,6.0,0.06);
+		spect = new PointSpectator(nullvec3,unimat3,0.6,4.0,0.0);
 
-		scene.addObject(new Sphere(vec3(-1.0,0,-6), 1.0, new DiffuseMaterial(vec4(0.8,0.2,0.2,1))));
-		scene.addObject(new Sphere(vec3(1.0,0,-6), 1.0, new DiffuseMaterial(vec4(0.2,0.2,0.8,1))));
-		scene.addObject(new Sphere(vec3(0.2,-0.6,-2), 0.4, new DiffuseMaterial(vec4(0.2,0.8,0.2,1))));
-		EmittingSphere *emi = new EmittingSphere(vec3(12,24,-16), 4.0, new AbsorbingMaterial(), vec4(2e2,2e2,2e2,1));
-		scene.addEmitter(emi);
+		AttractingSphere *red = new AttractingSphere(
+					vec3(0.6,-0.4,-3),
+					0.6,
+					new SpecularAndTransparentMaterial(0.1,1.4,vec4(1.0,0.4,0.4,1))
+					);
+		AttractingSphere *blue = new AttractingSphere(
+					vec3(-0.6,-0.2,-4),
+					0.8,
+					new SpecularAndDiffuseMaterial(0.1,vec4(0.4,0.4,1.0,1))
+					);
+		scene.addAttractor(red);
+		scene.addObject(red);
+		//scene.addAttractor(blue);
+		scene.addObject(blue);
+		AttractingSphere *emi = new AttractingSphere(vec3(12,24,-16), 4.0, new EmittingMaterial(vec4(2e2,2e2,2e2,1)));
+		scene.addAttractor(emi);
 		scene.addObject(emi);
 
 		vec3 qv[4] = {vec3(5,-1,-9),vec3(-5,-1,-9),vec3(-5,-1,1),vec3(5,-1,1)};
@@ -46,19 +58,6 @@ public:
 						new DiffuseMaterial(vec4(0.4,0.4,0.4,1))
 						)
 					);
-
-		/*
-		for(int ix = 0; ix < 3; ++ix)
-		{
-			for(int iy = 0; iy < 2; ++iy)
-			{
-				for(int iz = 0; iz < 4; ++iz)
-				{
-					scene.add(new Sphere(vec3(ix - 1, iy - 0.5, iz - 6), 0.2, m));
-				}
-			}
-		}
-		*/
 	}
 	virtual vec4 trace(const vec2 &pix, ContRand &rand) const
 	{

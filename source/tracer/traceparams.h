@@ -15,7 +15,7 @@ public:
 	{
 	public:
 		int rays_density;
-		int emitting_rays_density;
+		int attracting_rays_density;
 	};
 
 	SpectatorParam spectator;

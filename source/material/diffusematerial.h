@@ -19,6 +19,11 @@ public:
 
 	}
 
+	virtual bool isAttractive() const
+	{
+		return true;
+	}
+
 	virtual vec3 getReflection(
 			const vec3 &d,
 			const vec3 &n,
@@ -39,9 +44,14 @@ public:
 			const Object::IntersectState &state,
 			const std::vector< std::pair<vec3,double> > &fdir,
 			const TraceParams::SceneParam &param,
-            ContRand &rand
+			ContRand &rand,
+			double weight = 1.0
 			) const
 	{
+		if(!(ray.flag & Ray::DIFFUSE))
+		{
+			return nullvec4;
+		}
         for(const std::pair<vec3,double> &pair : fdir)
         {
 			if(pair.first*state.normal > 0)
@@ -50,8 +60,8 @@ public:
                             Ray(
                                 state.point,
                                 pair.first,
-								2*(state.normal*pair.first)*(getColor() & ray.color)*pair.second,
-								true
+								2*(state.normal*pair.first)*(getColor() & ray.color)*pair.second*weight,
+								Ray::EMITTED
 								)
 							);
             }
@@ -64,7 +74,8 @@ public:
 						Ray(
 							state.point,
 							dir,
-							(getColor() & ray.color)/param.rays_density
+							(getColor() & ray.color)/param.rays_density*weight,
+							Ray::DIFFUSE
                             )
 						);
 		}
