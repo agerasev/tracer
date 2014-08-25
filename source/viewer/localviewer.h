@@ -28,7 +28,7 @@ private:
 	LocalBuffer *buffer;
 
 	/* Shared slice queue */
-	std::queue<Slice> slice_queue;
+	std::queue< std::unique_ptr<const Surface> > surface_queue;
 	Mutex mutex;
 
 	int redraw = 2;
@@ -87,17 +87,17 @@ public:
 		bool br = false;
 		for(;;)
 		{
-			Slice slice;
+			std::unique_ptr<const Surface> surface;
 			mutex.lock();
 			{
-				if(slice_queue.empty())
+				if(surface_queue.empty())
 				{
 					br = true;
 				}
 				else
 				{
-					slice = slice_queue.front();
-					slice_queue.pop();
+					surface = std::move(surface_queue.front());
+					surface_queue.pop();
 				}
 			}
 			mutex.unlock();
@@ -108,7 +108,7 @@ public:
 			}
 
 			redraw = 2;
-			buffer->update(slice);
+			buffer->update(surface.get());
 		}
 
 		if(redraw > 0)
@@ -116,7 +116,7 @@ public:
 			--redraw;
 
 			/* Transfers data to GPU
-		 * TODO: Transfer only updated data */
+			 * TODO: Transfer only updated data */
 			glVertexPointer( 2, GL_FLOAT, 0, buffer->getPointData() );
 			glColorPointer( 4, GL_FLOAT, 0, buffer->getColorData() );
 
@@ -124,12 +124,12 @@ public:
 		}
 	}
 
-	virtual void update(const Slice &s)
+	virtual void update(std::unique_ptr<const Surface> surface)
 	{
 		/* Add to queue */
 		mutex.lock();
 		{
-			slice_queue.push(s);
+			surface_queue.push(std::move(surface));
 		}
 		mutex.unlock();
 	}

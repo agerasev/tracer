@@ -8,7 +8,7 @@
 #include<vector>
 #include<iostream>
 
-#include<common/slice.h>
+#include<render/container/surface.h>
 
 class LocalBuffer
 {
@@ -16,9 +16,6 @@ private:
 	float *color = nullptr;
 	float *point = nullptr;
 	int w = 0, h = 0;
-
-	std::vector<Slice> slice;
-	int slice_size = 2;
 
 public:
 	LocalBuffer()
@@ -55,41 +52,6 @@ public:
 				*(color + 4*(iy*w + ix) + 3)	= 0.0f;
 			}
 		}
-		/* Making slices of memory */
-		slice.clear();
-		int slice_number = (h + slice_size - 1)/slice_size;
-		slice.reserve(slice_number);
-		for(int j = 0; j < slice_number; ++j)
-		{
-			int i = slice_number/2 - (j*(j%2) - j/2);
-			int last_slice_size = slice_size;
-			if(i + 1 == slice_number)
-			{
-				last_slice_size = (h % slice_size);
-				if(last_slice_size == 0)
-				{
-					last_slice_size = slice_size;
-				}
-			}
-			slice.push_back(
-						Slice(
-							color + 4*i*slice_size*w,
-							w,
-							ivec4(0, w, i*slice_size, last_slice_size),
-							vec4(-w, 2.0*w, 2.0*i*slice_size - h, 2.0*last_slice_size)/h
-							)
-						);
-		}
-	}
-
-	std::vector<Slice>::iterator begin()
-	{
-		return slice.begin();
-	}
-
-	std::vector<Slice>::iterator end()
-	{
-		return slice.end();
 	}
 
 	const float *getPointData()
@@ -124,15 +86,15 @@ public:
 		std::cout << "'render.bmp' was saved to 'output'" << std::endl;
 	}
 
-	void update(const Slice &slice)
+	void update(const Surface *surface)
 	{
-		for(int iy = 0; iy < slice.h(); ++iy)
+		for(int iy = 0; iy < surface->h(); ++iy)
 		{
-			for(int ix = 0; ix < slice.w(); ++ix)
+			for(int ix = 0; ix < surface->w(); ++ix)
 			{
 				for(int i = 0; i < 4; ++i)
 				{
-					color[4*((iy + slice.y())*w + (ix + slice.x())) + i] = slice.getPixel(ix,iy)[i];
+					color[4*((iy + surface->y())*w + (ix + surface->x())) + i] = surface->getPixel(ix,iy)[i];
 				}
 			}
 		}

@@ -15,7 +15,7 @@ class SphericRand : public Rand<vec3>
 private:
 	ContRand generator;
 public:
-	static vec3 wrap(ContRand &rand)
+	static vec3 wrap(Rand<double> &rand)
 	{
 		double phi = 2.0*PI*rand.get();
 		double theta = acos(1.0 - 2.0*rand.get());
@@ -37,11 +37,11 @@ private:
 		return rand - static_cast<double>(proj < 0)*(2.0*normal*proj);
 	}
 public:
-	static vec3 wrap(SphericRand &spheric_rand, const vec3 &normal)
+	static vec3 wrap(Rand<vec3> &spheric_rand, const vec3 &normal)
 	{
 		return reflect(spheric_rand.get(),normal);
 	}
-	static vec3 wrap(ContRand &rand, const vec3 &normal)
+	static vec3 wrap(Rand<double> &rand, const vec3 &normal)
 	{
 		return reflect(SphericRand::wrap(rand),normal);
 	}

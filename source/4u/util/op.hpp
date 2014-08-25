@@ -46,6 +46,14 @@ inline constexpr int sgn(T arg)
 {
 	return static_cast<int>(static_cast<T>(0) < arg) - static_cast<int>(arg < static_cast<T>(0));
 }
+/* clamping operation */
+template <typename T>
+inline float clamp(T x)
+{
+
+	return x < static_cast<T>(0) ? static_cast<T>(0) : (x > static_cast<T>(1) ? static_cast<T>(1) : x);
+
+}
 
 template <typename T>
 inline T _pow(T arg, int exp)

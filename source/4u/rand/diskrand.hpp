@@ -12,7 +12,7 @@ class DiskRand : public Rand<vec2>
 private:
 	ContRand rand;
 public:
-	static vec2 wrap(ContRand &rand)
+	static vec2 wrap(Rand<double> &rand)
 	{
 		double r = sqrt(rand.get());
 		double phi = 2.0*PI*rand.get();

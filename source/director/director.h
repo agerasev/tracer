@@ -3,13 +3,16 @@
 
 #include<list>
 #include<iostream>
+#include<memory>
+#include<queue>
 
 #include<common/worker.h>
 #include<common/viewer.h>
-#include<common/slice.h>
 
 #include<4u/thread/thread.hpp>
 #include<4u/thread/mutex.hpp>
+
+#include"task/pathtracingtask.h"
 
 #include"globalbuffer.h"
 
@@ -23,11 +26,13 @@ private:
 	std::list<Viewer*> viewers;
 	std::list<Worker*> workers;
 
+	RenderParams params;
+
 	GlobalBuffer *buffer;
-	std::vector<Slice>::iterator slice_iterator;
+	std::vector< std::pair<ivec4,vec4> >::iterator range_iterator;
 
 	Mutex mutex;
-	std::queue<Slice> slice_queue;
+	std::queue< std::unique_ptr<const Result> > result_queue;
 
 	int rendering_slices = 0;
 	bool dumped = false;
@@ -103,28 +108,33 @@ public:
 				v->resize(x,y);
 			}
 			buffer->resize(x,y);
-			slice_iterator = buffer->begin();
+			range_iterator = buffer->begin();
 			w = x; h = y;
 		}
 		mutex.unlock();
 	}
 
-	void updateViewers()
+	void setParams(const RenderParams &p)
+	{
+		params = p;
+	}
+
+	void update()
 	{
 		bool br = false;
 		for(;;)
 		{
-			Slice slice;
+			std::unique_ptr<const Result> result;
 			mutex.lock();
 			{
-				if(slice_queue.empty())
+				if(result_queue.empty())
 				{
 					br = true;
 				}
 				else
 				{
-					slice = slice_queue.front();
-					slice_queue.pop();
+					result = std::move(result_queue.front());
+					result_queue.pop();
 				}
 			}
 			mutex.unlock();
@@ -134,14 +144,36 @@ public:
 				break;
 			}
 
+			const Surface *surface = nullptr;
+			if(result->type == TYPE_RESULT_SURFACE)
+			{
+				const SurfaceResult *sr = dynamic_cast<const SurfaceResult *>(result.get());
+				if(sr != nullptr)
+				{
+					surface = new Surface(*sr->getSurface());
+				}
+			}
+
+			if(surface == nullptr)
+			{
+				return;
+			}
+
 			mutex.lock();
 			{
+				buffer->update(surface);
 				for(Viewer *v : viewers)
 				{
-					v->update(slice);
+					v->update(std::unique_ptr<const Surface>(surface));
 				}
 			}
 			mutex.unlock();
+		}
+		if(!dumped && rendering_slices == 0 && range_iterator == buffer->end())
+		{
+			std::cout << SDL_GetTicks()/1000.0 << " seconds" << std::endl;
+			buffer->save();
+			dumped = true;
 		}
 	}
 
@@ -154,13 +186,17 @@ public:
 			{
 				while(w->idle() > 0)
 				{
-					if(slice_iterator == buffer->end())
+					if(range_iterator == buffer->end())
 					{
 						ret = true;
 						break;
 					}
-					w->give(*slice_iterator);
-					++slice_iterator;
+					w->give(std::unique_ptr<Task>(new PathTracingTask(
+													  range_iterator->first,
+													  range_iterator->second,
+													  params
+													  )));
+					++range_iterator;
 					++rendering_slices;
 				}
 				if(ret)
@@ -172,19 +208,14 @@ public:
 		mutex.unlock();
 	}
 
-	virtual void done(const Slice &s)
+	virtual void done(std::unique_ptr<const Result> result)
 	{
 		mutex.lock();
 		{
-			slice_queue.push(s);
+			result_queue.push(std::move(result));
 			--rendering_slices;
 		}
 		mutex.unlock();
-		if(!dumped && rendering_slices == 0 && slice_iterator == buffer->end())
-		{
-			std::cout << SDL_GetTicks()/1000.0 << " seconds" << std::endl;
-			buffer->save();
-		}
 	}
 
 	void quit()
@@ -217,7 +248,7 @@ public:
 
 			SDL_Delay(0x20);
 			distributeWork();
-			updateViewers();
+			update();
 		}
 	}
 };

@@ -37,7 +37,7 @@ public:
 
 	}
 
-	static double wrap(ContRandInt &rand)
+	static double wrap(Rand<unsigned int> &rand)
 	{
 		return NORM_FACTOR*rand.get();
 	}

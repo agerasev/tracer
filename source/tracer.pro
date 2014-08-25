@@ -3,20 +3,28 @@ CONFIG += console
 CONFIG -= qt
 
 QMAKE_CXXFLAGS += -std=c++11 -O3
-QMAKE_CXXFLAGS_WARN_OFF += -Wunused-parameter
 
 unix {
     LIBS += -lSDL2main -lSDL2 -lGLEW -lGL
 }
 
 win32 {
-    INCLUDEPATH += C:\GLEW-MinGW\include C:\SDL2-2.0.3\i686-w64-mingw32\include
-    LIBS += -lmingw32 -LC:\SDL2-2.0.3\i686-w64-mingw32\lib -lsdl2main -lsdl2 -LC:\GLEW-MinGW\lib -lglew32 -lopengl32
+    INCLUDEPATH += $MINGW_PATH\include $SDL_PATH\i686-w64-mingw32\include $GLEW_PATH\include
+    LIBS += -lmingw32 -L$SDL_PATH\i686-w64-mingw32\lib -lsdl2main -lsdl2 -L$GLEW_PATH\lib -lglew32 -lopengl32
 }
 
+OTHER_FILES += \
+    TODO.markdown
+
+SOURCES += \
+    main.cpp
+
 HEADERS += \
+    4u/exception/compilationexception.hpp \
     4u/exception/exception.hpp \
     4u/exception/filenotfoundexception.hpp \
+    4u/exception/glexception.hpp \
+    4u/exception/linkageexception.hpp \
     4u/gl/fragmentshader.hpp \
     4u/gl/framebuffer.hpp \
     4u/gl/program.hpp \
@@ -32,59 +40,57 @@ HEADERS += \
     4u/la/vec3.hpp \
     4u/la/vec4.hpp \
     4u/la/vecn.hpp \
+    4u/rand/contrand.hpp \
+    4u/rand/diskrand.hpp \
+    4u/rand/rand.hpp \
+    4u/rand/sphericrand.hpp \
     4u/thread/mutex.hpp \
     4u/thread/thread.hpp \
     4u/util/const.hpp \
     4u/util/op.hpp \
-    4u/window/glwindow.hpp \
-    4u/window/window.hpp \
-    4u/exception/glexception.hpp \
-    4u/distrib/spheredistrib.hpp \
-    4u/rand/rand.hpp \
-    4u/rand/contrand.hpp \
-    4u/rand/sphericrand.hpp \
     4u/window/event.hpp \
     4u/window/glwindow.hpp \
+    4u/window/glxwindow.hpp \
     4u/window/sdlwindow.hpp \
     4u/window/window.hpp \
-    4u/window/glxwindow.hpp \
-    tracer/tracer.h \
-    tracer/scene.h \
-    tracer/ray.h \
-    tracer/traceparams.h \
-    object/sphere.h \
-    object/object.h \
-    material/material.h \
-    material/specularmaterial.h \
-    material/diffusematerial.h \
-    material/anisotropicdiffusematerial.h \
-    material/specularanddiffusematerial.h \
-    common/worker.h \
+    common/modifier.h \
+    common/result.h \
     common/viewer.h \
-    common/slice.h \
-    viewer/localviewer.h \
-    worker/localworker.h \
+    common/worker.h \
+    common/task.h \
     director/director.h \
-    viewer/localbuffer.h \
     director/globalbuffer.h \
+    director/result/surfaceresult.h \
+    viewer/localbuffer.h \
+    viewer/localviewer.h \
     worker/disributor.h \
-    worker/renderparams.h \
-    material/absorbingmaterial.h \
-    tracer/light.h \
-    object/triangle.h \
-    object/quad.h \
-    spectator/pointspectator.h \
-    spectator/spectator.h \
-    4u/rand/diskrand.hpp \
-    material/transparentmaterial.h \
-    material/emittingmaterial.h \
-    object/attractor.h \
-    object/attractingsphere.h \
-    object/plane.h \
-    material/specularandtransparentmaterial.h
-
-SOURCES += \
-    main.cpp
-
-OTHER_FILES += \
-    TODO.md
+    worker/localworker.h \
+    render/algorithm/pathtracing.h \
+    render/algorithm/photontracing.h \
+    render/container/surface.h \
+    render/container/photonmap.h \
+    render/spectator.h \
+    render/scene.h \
+    render/ray.h \
+    render/material.h \
+    render/color.h \
+    director/task/pathtracingtask.h \
+    render/spectator/planespectator.h \
+    render/object/sphere.h \
+    render/object.h \
+    render/params.h \
+    4u/thread/threadlocalstorage.hpp \
+    render/emitter.h \
+    render/path.h \
+    render/material/absorbingmaterial.h \
+    render/material/diffusematerial.h \
+    render/material/specularmaterial.h \
+    render/object/plane.h \
+    render/object/polygon.h \
+    render/material/glowingmaterial.h \
+    render/material/emittingmaterial.h \
+    render/attractor.h \
+    render/material/hybridmaterial.h \
+    render/object/materialobject.h \
+    render/material/anisotropicdiffusematerial.h \
+    render/material/transparentmaterial.h

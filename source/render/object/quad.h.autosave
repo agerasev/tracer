@@ -1,0 +1,53 @@
+#ifndef QUAD_H
+#define QUAD_H
+
+#include"object.h"
+
+#include<4u/util/const.hpp>
+
+#include"materialobject.h"
+
+class Quad : public MaterialObject
+{
+private:
+	vec3 vertex[4];
+	vec3 normal;
+public:
+	Quad(const vec3 v[4], Material *m)
+		: Object((v[0] + v[1] + v[2] + v[3])/4.0), MaterialObject(nullvec3,m)
+	{
+		vertex[0] = v[0];
+		vertex[1] = v[1];
+		vertex[2] = v[2];
+		vertex[3] = v[3];
+		normal = norm((v[1] - v[0])^(v[2] - v[0]));
+	}
+
+	/*
+	virtual void getSize() const
+	{
+		return vertex[0] +
+	}
+	*/
+
+	virtual bool intersect(
+			const Ray &ray,
+			IntersectState &state,
+			const TraceParams::SceneParam &param
+			) const
+	{
+
+		if(
+				((in - vertex[0])^(vertex[1] - vertex[0]))*normal < 0 &&
+				((in - vertex[1])^(vertex[2] - vertex[1]))*normal < 0 &&
+				((in - vertex[2])^(vertex[3] - vertex[2]))*normal < 0 &&
+				((in - vertex[3])^(vertex[0] - vertex[3]))*normal < 0
+				)
+		{
+			return true;
+		}
+		return false;
+	}
+};
+
+#endif // QUAD_H

@@ -1,40 +1,41 @@
 #ifndef LOCALWORKER_H
 #define LOCALWORKER_H
 
+#include<common/task.h>
+#include<common/result.h>
 #include<common/worker.h>
-#include<common/slice.h>
 
 #include<4u/thread/thread.hpp>
 #include<4u/thread/mutex.hpp>
 #include<4u/rand/contrand.hpp>
 
+#include<memory>
 #include<queue>
 
 #include"disributor.h"
-#include"renderparams.h"
 
-#include<tracer/tracer.h>
+#include<render/scene.h>
 
 class LocalWorker : public Worker, public Runnable
 {
 private:
-	Tracer *tracer;
+	const Scene *scene;
 	bool quited = false;
 
 	Mutex mutex;
 	int free;
 	ContRandInt init_rand;
 
-	std::queue<Slice> tasks;
+	std::queue< std::unique_ptr<Task> > tasks;
 
 	Callback *callback;
 
 	Distributor distributor;
-	const RenderParams params;
+	int threads;
 
 public:
-	LocalWorker(Tracer *t, const RenderParams p)
-		: tracer(t), free(2*p.threads), init_rand(), distributor(this), params(p)
+	LocalWorker(const Scene *s, int t)
+		: scene(s), free(2*t), init_rand(), distributor(this), threads(t)
 	{
 
 	}
@@ -55,22 +56,22 @@ public:
 		return ret;
 	}
 
-	virtual void give(Slice &slice)
+	virtual void give(std::unique_ptr<Task> task)
 	{
 		mutex.lock();
 		{
-			tasks.push(slice);
+			tasks.push(std::move(task));
 		}
 		mutex.unlock();
 	}
 
-	void renderTasks(ContRand &rand)
+	void performTasks(ContRand &rand)
 	{
 		bool br = false;
 		bool fr = true;
 		for(;;)
 		{
-			Slice slice;
+			std::unique_ptr<Task> task;
 
 			mutex.lock();
 			{
@@ -81,7 +82,7 @@ public:
 				else
 				{
 					fr = false;
-					slice = tasks.front();
+					task = std::move(tasks.front());
 					tasks.pop();
 				}
 			}
@@ -96,55 +97,20 @@ public:
 				break;
 			}
 
-			render(slice,rand);
-			callback->done(slice);
-		}
-	}
-
-	void render(Slice &slice, ContRand &rand)
-	{
-		mutex.lock();
-		{
-			--free;
-		}
-		mutex.unlock();
-
-		for(int iy = 0; iy < slice.h(); ++iy)
-		{
-			for(int ix = 0; ix < slice.w(); ++ix)
+			mutex.lock();
 			{
-				vec4 color = nullvec4;
-				for(int jy = 0; jy < params.detailing; ++jy)
-				{
-					vec4 lcolor = nullvec4;
-					for(int jx = 0; jx < params.detailing; ++jx)
-					{
-						lcolor += tracer->trace(
-									slice.getCoord(
-										ix + static_cast<double>(jx)/params.detailing - 0.5,
-										iy + static_cast<double>(jy)/params.detailing - 0.5
-										),
-									rand
-									);
-						if(quited)
-						{
-							return;
-						}
-					}
-					color += lcolor/params.detailing;
-				}
-				slice.setPixel(
-							color/params.detailing,
-							ix,iy
-							);
+				--free;
 			}
-		}
+			mutex.unlock();
 
-		mutex.lock();
-		{
-			++free;
+			callback->done(task->perform(scene,rand));
+
+			mutex.lock();
+			{
+				++free;
+			}
+			mutex.unlock();
 		}
-		mutex.unlock();
 	}
 
 	virtual void interrupt()
@@ -191,13 +157,13 @@ public:
 				break;
 			}
 
-			renderTasks(rand);
+			performTasks(rand);
 		}
 	}
 
 	void start()
 	{
-		distributor.start(params.threads);
+		distributor.start(threads);
 	}
 
 	void wait()

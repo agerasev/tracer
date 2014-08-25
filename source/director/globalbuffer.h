@@ -8,7 +8,7 @@
 #include<vector>
 #include<iostream>
 
-#include<common/slice.h>
+#include<render/container/surface.h>
 
 class GlobalBuffer
 {
@@ -16,8 +16,8 @@ private:
 	float *data = nullptr;
 	int w = 0, h = 0;
 
-	std::vector<Slice> slices;
-	int slice_size = 1;
+	std::vector< std::pair<ivec4,vec4> > ranges;
+	int slice_height = 1;
 
 public:
 	GlobalBuffer()
@@ -45,51 +45,49 @@ public:
 			}
 		}
 		/* Making slices of memory */
-		slices.clear();
-		int slice_number = (h + slice_size - 1)/slice_size;
-		slices.reserve(slice_number);
+		ranges.clear();
+		int slice_number = (h + slice_height - 1)/slice_height;
+		ranges.reserve(slice_number);
 		for(int j = 0; j < slice_number; ++j)
 		{
 			int i = slice_number/2 - (j*(j%2) - j/2);
-			int last_slice_size = slice_size;
+			int last_slice_height = slice_height;
 			if(i + 1 == slice_number)
 			{
-				last_slice_size = (h % slice_size);
-				if(last_slice_size == 0)
+				last_slice_height = (h % slice_height);
+				if(last_slice_height == 0)
 				{
-					last_slice_size = slice_size;
+					last_slice_height = slice_height;
 				}
 			}
-			slices.push_back(
-						Slice(
-							data + 4*i*slice_size*w,
-							w,
-							ivec4(0, w, i*slice_size, last_slice_size),
-							vec4(-w, 2.0*w, 2.0*i*slice_size - h, 2.0*last_slice_size)/h
+			ranges.push_back(
+						std::pair<ivec4, vec4>(
+							ivec4(0, i*slice_height, w, last_slice_height),
+							vec4(-w, 2.0*w, 2.0*i*slice_height - h, 2.0*last_slice_height)/h
 							)
 						);
 		}
 	}
 
-	std::vector<Slice>::iterator begin()
+	std::vector< std::pair<ivec4,vec4> >::iterator begin()
 	{
-		return slices.begin();
+		return ranges.begin();
 	}
 
-	std::vector<Slice>::iterator end()
+	std::vector< std::pair<ivec4,vec4> >::iterator end()
 	{
-		return slices.end();
+		return ranges.end();
 	}
 
-	void update(const Slice &slice)
+	void update(const Surface *surface)
 	{
-		for(int iy = 0; iy < slice.h(); ++iy)
+		for(int iy = 0; iy < surface->h(); ++iy)
 		{
-			for(int ix = 0; ix < slice.w(); ++ix)
+			for(int ix = 0; ix < surface->w(); ++ix)
 			{
 				for(int i = 0; i < 4; ++i)
 				{
-					data[4*((iy + slice.y())*w + (ix + slice.x())) + i] = slice.getPixel(ix,iy)[i];
+					data[4*((iy + surface->y())*w + (ix + surface->x())) + i] = surface->getPixel(ix,iy)[i];
 				}
 			}
 		}

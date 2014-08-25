@@ -1,7 +1,8 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
-#include"slice.h"
+#include<memory>
+#include<render/container/surface.h>
 
 class Viewer
 {
@@ -11,7 +12,7 @@ public:
 	virtual void resize(int w, int h) = 0;
 
 	/* Gives rendered slice to viewer */
-	virtual void update(const Slice &slice) = 0;
+	virtual void update(std::unique_ptr<const Surface> surface) = 0;
 };
 
 #endif // VIEWER_H
