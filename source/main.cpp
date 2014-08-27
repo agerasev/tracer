@@ -2,6 +2,7 @@
 
 #include<4u/window/glwindow.hpp>
 #include<4u/thread/thread.hpp>
+#include<4u/complex/quaternion.hpp>
 
 #include<viewer/localviewer.h>
 #include<worker/localworker.h>
@@ -16,6 +17,7 @@
 #include<render/object/sphere.h>
 #include<render/object/polygon.h>
 #include<render/object/materialobject.h>
+#include<render/object/distanceobject.h>
 
 #include<render/material/specularmaterial.h>
 #include<render/material/transparentmaterial.h>
@@ -31,8 +33,8 @@ int main(int, char *[]) {
 
 	/* Parameters needed for raytracing */
 	RenderParams render_params = {
-		8,		/* detailing */
-		4,		/* recursion depth */
+		2,		/* detailing */
+		2,		/* recursion depth */
 		{		/* scene parameters */
 			2,		/* diffuse rays number */
 			1,		/* emitting rays number */
@@ -44,40 +46,52 @@ int main(int, char *[]) {
 
 	/* Scene initializing */
 	Scene scene;
-	scene.setSpectator(new PlaneSpectator(vec3(0,-0.2,0),unimat3,0.4,5.0,0.2));
-
-
+	scene.setSpectator(new PlaneSpectator(vec3(0,0,0),unimat3,0.4,5.0,0.0));
 
 	scene.addObject(
-				new MaterialObject<Sphere>(
-					new HybridMaterial{
-						std::pair<const Material*,double>(new SpecularMaterial(WHITE),0.4),
-						std::pair<const Material*,double>(new DiffuseMaterial(Color(1.0,0.2,0.2)),0.6)
-					},
-					vec3(-0.4,0,-6.4),
-					1
+				new MaterialObject<DistanceObject>(
+					/* new HybridMaterial{
+						std::pair<const Material*,double>(new SpecularMaterial(WHITE),0.1),
+						std::pair<const Material*,double>(new DiffuseMaterial(Color(0.4,1,0.4)),0.9)
+					},*/
+					new DiffuseMaterial(WHITE),
+					vec3(-0.2,0,-3),
+					2.0,
+					[](const vec3 &pos)
+					{
+						typedef complex<complex<double>> qtr;
+						vec3 x(S32,0,0.5),y(0,1,0),z(-0.5,0,S32);
+						qtr a(pos*x,pos*y,pos*z,0.0), c(-0.5,0.6,0.4,0.0);
+						int i = 0;
+						const int iter = 0xa;
+						for(; i < iter; ++i)
+						{
+							a = a*a + c;
+							if(abs2(a).r() > 4.0)
+							{
+								break;
+							}
+						}
+						return (4.0*(iter - i - 1) + abs2(a).r() - 4.0)/(8.0*iter);
+					}
 					)
 				);
-	//scene.addObject(new MaterialSphere(vec3(0,0,-6),1,new GlowingMaterial(Color(0.8,1.6,0.8))));
-	scene.addObject(
-				new MaterialObject<Sphere>(
-					new HybridMaterial{
-						std::pair<const Material*,double>(new SpecularMaterial(WHITE),0.2),
-						std::pair<const Material*,double>(new TransparentMaterial(1.6,Color(0.6,0.6,1.0)),0.8)
-					},
-					vec3(0.6,-0.4,-5),
-					0.6
-					)
-				);
+	/*
 	scene.addObject(new MaterialObject<Quad>(
-						new AnisotropicDiffuseMaterial(WHITE,1.6),
+						new DiffuseMaterial(WHITE),
 						vec3(0,-1,-6),
 						vec3(0,1,0),
 						std::initializer_list<vec3>{vec3(8,-1,2),vec3(8,-1,-14),vec3(-8,-1,-14),vec3(-8,-1,2)}
 						));
-	Sphere *omni = new MaterialObject<Sphere>(new EmittingMaterial(Color(32,32,32)),vec3(0,2,-4),0.4);
-	scene.addObject(omni);
-	scene.addEmitter(omni);
+	*/
+
+	Sphere *omni1 = new MaterialObject<Sphere>(new EmittingMaterial(Color(512,512,256)),vec3(2,5,-3),0.2);
+	scene.addObject(omni1);
+	scene.addEmitter(omni1);
+
+	Sphere *omni2 = new MaterialObject<Sphere>(new EmittingMaterial(Color(2,2,2)),vec3(-3,-5,-2),1.6);
+	scene.addObject(omni2);
+	scene.addEmitter(omni2);
 
 	/* Worker performs rendering operations and
 	 * distributes them between threads */

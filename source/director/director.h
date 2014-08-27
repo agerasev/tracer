@@ -13,6 +13,7 @@
 #include<4u/thread/mutex.hpp>
 
 #include"task/pathtracingtask.h"
+#include"result/photonmapresult.h"
 
 #include"globalbuffer.h"
 
@@ -144,30 +145,34 @@ public:
 				break;
 			}
 
-			const Surface *surface = nullptr;
 			if(result->type == TYPE_RESULT_SURFACE)
 			{
+				const Surface *surface = nullptr;
 				const SurfaceResult *sr = dynamic_cast<const SurfaceResult *>(result.get());
 				if(sr != nullptr)
 				{
 					surface = new Surface(*sr->getSurface());
 				}
-			}
 
-			if(surface == nullptr)
-			{
-				return;
-			}
-
-			mutex.lock();
-			{
-				buffer->update(surface);
-				for(Viewer *v : viewers)
+				if(surface == nullptr)
 				{
-					v->update(std::unique_ptr<const Surface>(surface));
+					return;
 				}
+
+				mutex.lock();
+				{
+					buffer->update(surface);
+					for(Viewer *v : viewers)
+					{
+						v->update(std::unique_ptr<const Surface>(surface));
+					}
+				}
+				mutex.unlock();
 			}
-			mutex.unlock();
+			else if(result->type == TYPE_RESULT_PHOTON_MAP)
+			{
+
+			}
 		}
 		if(!dumped && rendering_slices == 0 && range_iterator == buffer->end())
 		{

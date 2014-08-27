@@ -28,6 +28,12 @@ inline int divmod(T &num, const T &den)
     return ret;
 }
 
+template <typename T>
+inline constexpr T _abs(const T &a)
+{
+	return (2*(a > 0) - 1)*a;
+}
+
 /* min max without conditional */
 template <typename T>
 inline constexpr T _min(const T &a, const T &b)

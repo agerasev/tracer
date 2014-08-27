@@ -70,6 +70,7 @@ public:
 		}
 
 		vec3 in = ray.start + ray.direction*k;
+		state.distance = k;
 		state.point = in;
 		state.normal = normal;
 

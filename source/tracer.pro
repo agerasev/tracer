@@ -93,4 +93,6 @@ HEADERS += \
     render/material/hybridmaterial.h \
     render/object/materialobject.h \
     render/material/anisotropicdiffusematerial.h \
-    render/material/transparentmaterial.h
+    render/material/transparentmaterial.h \
+    render/object/distanceobject.h \
+    director/result/photonmapresult.h

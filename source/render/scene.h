@@ -12,6 +12,8 @@
 #include<4u/util/const.hpp>
 #include<4u/rand/rand.hpp>
 
+#include"container/photonmap.h"
+
 class Scene
 {
 private:
@@ -25,6 +27,9 @@ private:
 	std::list<const Emitter*> const_emitters;
 
 	Spectator *spectator = nullptr;
+
+	PhotonMap *photon_map = nullptr;
+
 public:
 	/* Methods for objects placing */
 	void addObject(Object *obj)
@@ -100,6 +105,20 @@ public:
 		return spectator;
 	}
 
+	/* Setting photon map */
+	void setPhotonMap(PhotonMap *map)
+	{
+		photon_map = map;
+	}
+	PhotonMap *getPhotonMap()
+	{
+		return photon_map;
+	}
+	const PhotonMap *getPhotonMap() const
+	{
+		return photon_map;
+	}
+
 	const Object* intersect(const Ray &ray, Object::Intersection &state, const SceneParams &params, ContRand &rand) const
 	{
 		double record = INFINITY;
@@ -125,6 +144,12 @@ public:
 
 		state = target_state;
 		return target;
+	}
+
+	Color collectPhotons(const vec3 &)
+	{
+		/* TODO: collect photons */
+		return Color(0,0,0);
 	}
 
 	Color getAtmosphereColor(const Ray &) const
