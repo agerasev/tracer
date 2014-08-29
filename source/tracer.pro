@@ -95,4 +95,8 @@ HEADERS += \
     render/material/anisotropicdiffusematerial.h \
     render/material/transparentmaterial.h \
     render/object/distanceobject.h \
-    director/result/photonmapresult.h
+    director/result/photonmapresult.h \
+    render/object/juliaset.h \
+    render/object/functional.h \
+    render/spectator/pointspectator.h \
+    render/object/mandelbrotset.h

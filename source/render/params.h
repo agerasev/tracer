@@ -15,7 +15,8 @@ struct RenderParams
 {
 	int detailing;
 	int recursion_depth;
-	SceneParams scene;
+	SceneParams primary_scene;
+	SceneParams secondary_scene;
 };
 
 #endif // PARAMS_H

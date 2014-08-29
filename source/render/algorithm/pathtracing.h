@@ -20,10 +20,14 @@ private:
 			ContRand &rand
 			) const
 	{
-		Path path = Path(scene->getSpectator()->cast(pix,params.scene,rand));
+		Path path = Path(scene->getSpectator()->cast(pix,params.primary_scene,rand));
 
 		/* Computes interaction between ray and scene */
-		std::function<Color(Path&,int)> build = [&build,scene,&params,&rand](Path &path, int depth)
+		std::function<Color(Path&,int,const SceneParams&)> build = [&build,scene,&params,&rand](
+				Path &path,
+				int depth,
+				const SceneParams &spar
+				)
 		{
 			if(depth < 0)
 			{
@@ -42,7 +46,7 @@ private:
 			};
 
 			/* Finds intersection with scene */
-			const Object *obj = scene->intersect(path.ray,path.state,params.scene,rand);
+			const Object *obj = scene->intersect(path.ray,path.state,spar,rand);
 
 			if(path.object != nullptr && path.object != obj)
 			{
@@ -55,7 +59,7 @@ private:
 			if(path.object != nullptr)
 			{
 				/* Traces ray */
-				path.glow = path.object->trace(path.ray,path.state,add,params.scene,rand);
+				path.glow = path.object->trace(path.ray,path.state,add,spar,rand);
 
 				/* If objects produces diffuse ray */
 				if(path.object->getInteractionKind(path.state) & Ray::DIFFUSE)
@@ -65,16 +69,16 @@ private:
 					for(const Emitter *emi : *emitters)
 					{
 						std::function<void(const vec3 &, double)> add_attraction =
-								[&path,emi,&params,&rand](const vec3 &d, double p)
+								[&path,emi,&spar,&rand](const vec3 &d, double p)
 						{
 							std::function<void(Ray &&)> add = [&path,emi](Ray &&ray)
 							{
 								ray.mask |= Ray::EMIT;
 								path.paths.push_back(Path(ray,emi));
 							};
-							path.object->cast(path.ray,path.state,d,p,add,params.scene,rand);
+							path.object->cast(path.ray,path.state,d,p,add,spar,rand);
 						};
-						emi->attract(path.state.point,add_attraction,params.scene,rand);
+						emi->attract(path.state.point,add_attraction,spar,rand);
 					}
 				}
 			}
@@ -86,12 +90,17 @@ private:
 			Color sum = Color(0,0,0);
 			for(Path p : path.paths)
 			{
-				sum += build(p, depth -	1);
+				const SceneParams *par = &params.secondary_scene;
+				if(p.ray.flag & (Ray::REFLECT | Ray::REFRACT))
+				{
+					par = &params.primary_scene;
+				}
+				sum += build(p, depth -	1, *par);
 			}
 			return sum + path.ray.color*path.glow;
 		};
 
-		return build(path,params.recursion_depth);
+		return build(path,params.recursion_depth,params.primary_scene);
 	}
 
 public:
